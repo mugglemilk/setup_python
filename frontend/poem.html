@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วิเคราะห์กลอน ๘</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  /* ── Design tokens ── */
+  :root {
+    --bg:         #16293a;
+    --surface:    #1f3a50;
+    --surface2:   #122030;
+    --border:     rgba(255,255,255,0.08);
+    --text:       #cfe0ec;
+    --muted:      #5c7e95;
+    --accent:     #c4956a;
+    --accent-h:   #d4a87c;
+    --ok:         #4ade80;
+    --warn:       #facc15;
+    --err:        #f87171;
+    --shadow:     0 4px 28px rgba(0,0,0,0.5);
+    --radius:     14px;
+    --trans:      0.22s ease;
+  }
+  [data-theme="light"] {
+    --bg:         #afc6d4;
+    --surface:    #ffffff;
+    --surface2:   #dceaf2;
+    --border:     rgba(0,0,0,0.07);
+    --text:       #1a3040;
+    --muted:      #5e8aa4;
+    --accent:     #b8854c;
+    --accent-h:   #cc9a5e;
+    --ok:         #16a34a;
+    --warn:       #b45309;
+    --err:        #dc2626;
+    --shadow:     0 4px 20px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Kanit', 'Sarabun', sans-serif;
+    font-weight: 300;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background var(--trans), color var(--trans);
+  }
+
+  /* ── Navbar ── */
+  .navbar {
+    display: flex;
+    align-items: center;
+    padding: 0 28px;
+    height: 56px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    gap: 8px;
+    transition: background var(--trans);
+  }
+  .nav-brand {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    margin-right: 16px;
+    white-space: nowrap;
+  }
+  .nav-links { display: flex; gap: 2px; flex: 1; }
+  .nav-link {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.87rem;
+    font-family: inherit;
+    font-weight: 400;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all var(--trans);
+    white-space: nowrap;
+  }
+  .nav-link:hover  { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--accent); background: var(--surface2); font-weight: 600; }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 1.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+    text-align: center;
+  }
+  .theme-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    color: var(--muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all var(--trans);
+    white-space: nowrap;
+  }
+  .theme-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .container { max-width: 920px; margin: 0 auto; padding: 28px 24px 72px; }
+
+  /* ── Input card ── */
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+    transition: background var(--trans);
+  }
+  textarea {
+    width: 100%;
+    height: 155px;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 14px 16px;
+    font-size: 1.08rem;
+    font-family: inherit;
+    font-weight: 300;
+    resize: vertical;
+    line-height: 2.1;
+    outline: none;
+    transition: border-color var(--trans), background var(--trans);
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--muted); opacity: 0.6; }
+
+  /* ── Controls ── */
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 30px;
+    font-size: 0.98rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background var(--trans), transform 0.1s;
+  }
+  .btn-primary:hover  { background: var(--accent-h); }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--trans);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
+  .check-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--muted);
+    font-size: 0.86rem;
+    cursor: pointer;
+    margin-left: auto;
+    user-select: none;
+    transition: color var(--trans);
+  }
+  .check-label:hover { color: var(--text); }
+  .check-label input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.81rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+    align-items: center;
+    transition: background var(--trans);
+  }
+  .legend-label { font-weight: 600; color: var(--accent); margin-right: 2px; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    transition: background var(--trans);
+  }
+  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Result ── */
+  .stanza {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 30px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+    transition: background var(--trans);
+  }
+  .stanza-num {
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--muted);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  .line-row {
+    display: flex;
+    margin-bottom: 2px;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .half {
+    flex: 1;
+    min-width: 240px;
+    line-height: 2.7;
+    font-size: 1.18rem;
+    font-weight: 300;
+    padding: 0 8px;
+  }
+  .half-divider {
+    padding: 0 10px;
+    font-size: 1.1rem;
+    line-height: 2.7;
+    color: var(--border);
+    opacity: 0.6;
+  }
+
+  /* ── Rhyme highlights (dark default) ── */
+  .r-sut    { background: rgba(184,125,255,0.14); border-bottom: 2px solid #b87dff; border-radius: 3px; padding: 0 2px; }
+  .r-nai    { background: rgba(255,107,122,0.14); border-bottom: 2px solid #ff6b7a; border-radius: 3px; padding: 0 2px; }
+  .r-son    { background: rgba(78,203,141,0.14);  border-bottom: 2px solid #4ecb8d; border-radius: 3px; padding: 0 2px; }
+  .r-ton    { background: rgba(91,156,246,0.14);  border-bottom: 2px solid #5b9cf6; border-radius: 3px; padding: 0 2px; }
+  .r-bad    { background: rgba(255,204,0,0.11);   border-bottom: 2px dashed #ffcc00; border-radius: 3px; padding: 0 2px; }
+  .word-err { background: rgba(255,68,68,0.11);   border-bottom: 2px dashed #ff4444; border-radius: 3px; padding: 0 2px; }
+
+  /* ── Rhyme highlights (light) ── */
+  [data-theme="light"] .r-sut    { background: rgba(139,47,207,0.09); border-bottom-color: #8b2fcf; }
+  [data-theme="light"] .r-nai    { background: rgba(201,39,52,0.09);  border-bottom-color: #c92734; }
+  [data-theme="light"] .r-son    { background: rgba(22,101,52,0.09);  border-bottom-color: #166534; }
+  [data-theme="light"] .r-ton    { background: rgba(29,78,216,0.09);  border-bottom-color: #1d4ed8; }
+  [data-theme="light"] .r-bad    { background: rgba(180,130,0,0.09);  border-bottom-color: #a36200; }
+  [data-theme="light"] .word-err { background: rgba(185,28,28,0.09);  border-bottom-color: #b91c1c; }
+
+  /* ── Rhyme report ── */
+  .rhyme-report {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 9px;
+    font-size: 0.87rem;
+    line-height: 2;
+    border-left: 3px solid var(--border);
+    transition: background var(--trans);
+  }
+  .rhyme-report.has-issues { border-left-color: var(--err); }
+  .rhyme-report.all-ok     { border-left-color: var(--ok); }
+  .rhyme-report h3 {
+    color: var(--accent);
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .ok-msg   { color: var(--ok); }
+  .warn-msg { color: var(--warn); }
+  .err-msg  { color: var(--err); }
+
+  /* ── Diagram ── */
+  .diagram {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-radius: 9px;
+    font-size: 0.83rem;
+    border: 1px solid var(--border);
+    transition: background var(--trans);
+  }
+  .diagram h3 {
+    color: var(--accent);
+    margin-bottom: 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .diagram table { width: 100%; border-collapse: collapse; }
+  .diagram td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .diagram tr:last-child td { border-bottom: none; }
+  .diagram td:first-child { color: var(--muted); width: 88px; font-size: 0.78rem; white-space: nowrap; }
+
+  /* ── Tooltip ── */
+  [data-tip] { position: relative; cursor: help; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    white-space: normal;
+    max-width: 480px;
+    min-width: 200px;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 200;
+    box-shadow: var(--shadow);
+  }
+  [data-tip]:hover::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="nav-brand" href="/">ไทยซิม</a>
+  <div class="nav-links">
+    <a href="/" class="nav-link">ค้นหาคำพ้อง</a>
+    <a href="/dictionary" class="nav-link">พจนานุกรม</a>
+    <a href="/poem" class="nav-link active">วิเคราะห์กลอน</a>
+  </div>
+  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+    <span id="themeIcon">☀</span><span id="themeLabel">โหมดสว่าง</span>
+  </button>
+</nav>
+
+<div class="container">
+
+  <div class="header">
+    <h1>วิเคราะห์กลอน ๘</h1>
+  </div>
+  <p class="subtitle">วางบทกลอนแล้วกด "วิเคราะห์" — ระบบจะตรวจฉันทลักษณ์และไฮไลท์คำสัมผัส</p>
+
+  <div class="input-card">
+    <textarea id="poemInput" placeholder="วางบทกลอนที่นี่ เช่น&#10;โอ้ว่าน่าเสียดายหลายประการ   เพราะเหตุการณ์ร้ายกาจอาจผ่านพ้น&#10;ใจหนึ่งรักอีกใจหนึ่งหมดจน   ความฝันปลิวลมพ้นจากอกเรา"></textarea>
+    <div class="controls">
+      <button class="btn-primary" id="analyzeBtn" onclick="analyze()">วิเคราะห์</button>
+      <button class="btn-ghost" onclick="clearAll()">ล้าง</button>
+      <label class="check-label">
+        <input type="checkbox" id="showDiagram" checked> แสดงแผนผัง
+      </label>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-label">สัมผัส</span>
+    <div class="legend-item"><span class="swatch" style="background:#b87dff"></span> ท้ายวรรคสดับ</div>
+    <div class="legend-item"><span class="swatch" style="background:#ff6b7a"></span> ท้ายวรรครับ / วรรครอง</div>
+    <div class="legend-item"><span class="swatch" style="background:#4ecb8d"></span> ท้ายวรรคส่ง</div>
+    <div class="legend-item"><span class="swatch" style="background:#5b9cf6"></span> คำที่ 3/5 รับสัมผัสใน</div>
+    <div class="legend-item"><span class="swatch" style="background:#ffcc00"></span> สัมผัสไม่ตรง</div>
+  </div>
+
+  <div id="result"></div>
+</div>
+
+<script>
+// ── Theme toggle ──
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const dark = theme === 'dark';
+  document.getElementById('themeIcon').textContent  = dark ? '☀' : '🌙';
+  document.getElementById('themeLabel').textContent = dark ? 'โหมดสว่าง' : 'โหมดมืด';
+  localStorage.setItem('thai-theme', theme);
+}
+function toggleTheme() {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+applyTheme(localStorage.getItem('thai-theme') || 'dark');
+
+// ── Render helpers ──
+function renderWord(w) {
+  if (!w.word) return '';
+  const cls = w.cls ? ` class="${w.cls}"` : '';
+  const tip = w.tip ? ` data-tip="${w.tip.replace(/"/g, '&quot;')}"` : '';
+  return `<span${cls}${tip}>${w.word}</span>`;
+}
+
+function renderHalf(annotated) {
+  return annotated.map(renderWord).join(' ');
+}
+
+function statusIcon(ok) {
+  return ok
+    ? `<span style="color:var(--ok)">✓</span>`
+    : `<span style="color:var(--err)">✗</span>`;
+}
+
+function renderStanza(st) {
+  const pairs = [[0, 1], [2, 3]];
+  let html = `<div class="stanza"><div class="stanza-num">บทที่ ${st.index + 1}</div>`;
+
+  pairs.forEach(([li, ri]) => {
+    html += `<div class="line-row">
+      <span class="half">${renderHalf(st.annotations[li])}</span>
+      <span class="half-divider">┃</span>
+      <span class="half">${renderHalf(st.annotations[ri])}</span>
+    </div>`;
+  });
+
+  const hasIssues = st.issues.length > 0;
+  html += `<div class="rhyme-report ${hasIssues ? 'has-issues' : 'all-ok'}">`;
+  if (hasIssues) {
+    html += `<h3>ข้อสังเกต</h3>`;
+    st.issues.forEach(iss => {
+      const cls  = iss.type === 'err' ? 'err-msg' : 'warn-msg';
+      const icon = iss.type === 'err' ? '✗' : '⚠';
+      html += `<div class="${cls}">${icon} ${iss.message}</div>`;
+    });
+  } else {
+    html += `<div class="ok-msg">✓ ฉันทลักษณ์ถูกต้อง</div>`;
+  }
+  html += `</div>`;
+
+  if (document.getElementById('showDiagram').checked) {
+    const [A, B, C, D] = st.last_syls.map(w => w || '—');
+    const { nok_ok: nokOk, ir1, ir3 } = st;
+    const ir1Word = ir1.ok ? (st.halves[1].syllables[ir1.recv_idx] || '?') : '?';
+    const ir3Word = ir3.ok ? (st.halves[3].syllables[ir3.recv_idx] || '?') : '?';
+
+    html += `<div class="diagram"><h3>แผนผังสัมผัส</h3>
+      <table>
+        <tr>
+          <td>สัมผัสใน</td>
+          <td><span class="r-sut">${A}</span> → <span class="r-ton">${ir1Word}</span> (คำที่ ${ir1.ok ? ir1.recv_idx + 1 : '?'} วรรครับ) ${statusIcon(ir1.ok)}</td>
+        </tr>
+        <tr>
+          <td>สัมผัสนอก</td>
+          <td><span class="r-nai">${B}</span> ↔ <span class="r-nai">${C}</span> ${statusIcon(nokOk)}</td>
+        </tr>
+        <tr>
+          <td>สัมผัสใน</td>
+          <td><span class="r-nai">${C}</span> → <span class="r-ton">${ir3Word}</span> (คำที่ ${ir3.ok ? ir3.recv_idx + 1 : '?'} วรรคส่ง) ${statusIcon(ir3.ok)}</td>
+        </tr>
+        <tr>
+          <td>ระหว่างบท</td>
+          <td><span class="r-son">${D}</span> → วรรครับบทถัดไป ${
+            st.carry_ok === false ? statusIcon(false)
+            : st.carry_ok === true ? statusIcon(true)
+            : `<span style="color:var(--muted);font-size:0.8rem">(บทแรก)</span>`
+          }</td>
+        </tr>
+      </table>
+    </div>`;
+  }
+
+  return html + '</div>';
+}
+
+async function analyze() {
+  const text = document.getElementById('poemInput').value.trim();
+  if (!text) { document.getElementById('result').innerHTML = ''; return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.textContent = 'กำลังวิเคราะห์…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/poem/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      document.getElementById('result').innerHTML =
+        `<div style="color:var(--err);padding:16px;background:var(--surface);border-radius:var(--radius)">เกิดข้อผิดพลาด: ${err.error || res.statusText}</div>`;
+      return;
+    }
+    const data = await res.json();
+    document.getElementById('result').innerHTML = data.stanzas.map(renderStanza).join('');
+  } catch (e) {
+    document.getElementById('result').innerHTML =
+      `<div style="color:var(--err);padding:16px;background:var(--surface);border-radius:var(--radius)">ไม่สามารถเชื่อมต่อ API ได้: ${e.message}</div>`;
+  } finally {
+    btn.textContent = 'วิเคราะห์';
+    btn.disabled = false;
+  }
+}
+
+function clearAll() {
+  document.getElementById('poemInput').value = '';
+  document.getElementById('result').innerHTML = '';
+}
+</script>
+</body>
+</html>
