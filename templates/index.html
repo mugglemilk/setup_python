@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Klon Synonym Tool</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        .hl-between { color: #0984e3; font-weight: bold; }
+        :root {
+            --bg-color: #acc8d4;
+            --panel-bg: #e8e4c9;
+            --header-blue: #64a1bc;
+            --btn-blue: #4a90e2;
+            --border-light: rgba(0,0,0,0.1);
+            --pink-accent: #f0c1d1;
+            --placeholder-gray: #757575;
+        }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .top-banner {
+            background-color: var(--pink-accent);
+            width: 95%;
+            max-width: 1400px;
+            padding: 12px 45px;
+            box-sizing: border-box;
+            border-radius: 40px;
+            margin: 25px 0;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .nav-buttons { display: flex; gap: 15px; }
+        .nav-btn {
+            background-color: rgba(255,255,255,0.5);
+            color: #333;
+            text-decoration: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .nav-btn:hover { background-color: #fff; }
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: 1.4fr 0.6fr;
+            gap: 30px;
+            align-items: stretch;
+            padding-bottom: 50px;
+        }
+        .left-column { display: flex; flex-direction: column; gap: 25px; }
+        .card {
+            background: #d9d9d9;
+            border-radius: 15px;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+        }
+        .section-header {
+            background: #ccc;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .editor-content { padding: 25px; }
+
+        #inputText {
+            width: 100%;
+            min-height: 250px;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 20px;
+            font-family: 'Sarabun', sans-serif;
+            line-height: 2.2;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-sizing: border-box;
+        }
+        #inputText:empty:before {
+            content: attr(data-placeholder);
+            color: var(--placeholder-gray);
+            pointer-events: none;
+        }
+
+        .btn-analyze {
+            background: var(--btn-blue);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            border-radius: 12px;
+            cursor: pointer;
+            float: right;
+            margin: 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .analysis-card {
+            background: var(--header-blue);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .analysis-header { padding: 12px 25px; font-weight: bold; color: white; }
+        .analysis-body {
+            background: var(--panel-bg);
+            margin: 0 15px 15px 15px;
+            border-radius: 12px;
+            padding: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .stanza-group {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #ddd;
+        }
+        .stanza-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .stanza-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .warrak-box {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            border-left: 5px solid;
+            margin-bottom: 8px;
+        }
+        .warrak-box.sadap { border-left-color: #c0392b; }
+        .warrak-box.rab { border-left-color: #8e44ad; }
+        .warrak-box.rong { border-left-color: #2980b9; }
+        .warrak-box.song { border-left-color: #27ae60; }
+        .warrak-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .warrak-name { min-width: 90px; }
+        .warrak-name.sadap { color: #c0392b; }
+        .warrak-name.rab { color: #8e44ad; }
+        .warrak-name.rong { color: #2980b9; }
+        .warrak-name.song { color: #27ae60; }
+        .syllable-badge {
+            background: #d4edda;
+            color: #155724;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        .syllable-badge.bad { background: #f8d7da; color: #721c24; }
+        .warrak-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.7;
+            margin: 6px 0;
+            word-wrap: break-word;
+        }
+        .warrak-text .emphasis {
+            font-weight: bold;
+            background-color: #fff3cd;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }
+        .warrak-meta { font-size: 10px; color: #888; margin-top: 4px; }
+        .error-box {
+            background: #f8d7da;
+            border-left: 5px solid #d63031;
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: #721c24;
+        }
+        .error-box-title { font-weight: bold; margin-bottom: 6px; }
+        .error-box-detail { font-size: 13px; color: #666; margin-top: 6px; }
+        .rhyme-summary {
+            background: white;
+            border-left: 5px solid #f39c12;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .summary-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .rhyme-type {
+            margin-bottom: 8px;
+            font-size: 11px;
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .rhyme-type:last-child { margin-bottom: 0; }
+        .rhyme-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .rhyme-dot.outside { background-color: #c0392b; }
+        .rhyme-dot.inside { background-color: #27ae60; }
+        .rhyme-dot.between { background-color: #0984e3; }
+        .status-badge {
+            display: inline-block;
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+        .status-badge.ok { background: #d4edda; color: #155724; }
+        .status-badge.error { background: #f8d7da; color: #721c24; }
+        .suggestion-column {
+            background: var(--panel-bg);
+            border-radius: 15px;
+            border: 1px solid var(--border-light);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .suggestion-header, .blue-divider {
+            background: var(--header-blue);
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+        }
+        .word-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            flex: 1;
+            align-content: start;
+        }
+        .no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            padding: 30px 0;
+        }
+        .word-pill {
+            background: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+        }
+        .word-pill:hover { background: #f0f0f0; 
+                            transform: translateY(-2px); }
+        .word-pill.rhyme-match { border-color: #ffc107; 
+                            background: #fff8e1; }
+        .rhyme-need-box {
+            background: #fff8e1;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 10px 16px;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7d5a00;
+            line-height: 1.8;
+        }
+        .klon-structure-hint {
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+            display: flex;
+            gap: 20px;
+        }
+        .hint-left { color: #c0392b; font-weight: bold; }
+        .hint-right { color: #8e44ab; font-weight: bold; }
+
+        .hl-outside  { color: #c0392b; font-weight: bold; }
+        .hl-between  { color: #c0392b; font-weight: bold; 
+                        text-decoration: underline; 
+                        text-decoration-color: #0984e3;
+                        text-decoration-thickness: 3px; }
+        .hl-song-end { color: #0984e3; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="top-banner">
+    <span>แต่งกลอนแปด</span>
+    <div class="nav-buttons">
+        <a href="/" class="nav-btn">หน้าหลัก</a>
+        <a href="/dictionary" class="nav-btn">ตารางคำศัพท์</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="left-column">
+        <div class="card">
+            <div class="editor-content">
+                <div id="inputText"
+                    contenteditable="true"
+                    data-placeholder="พิมพ์บทประพันธ์ประเภทกลอนสุภาพ (กลอนแปด). . ."
+                    onmouseup="handleSelection()"></div>
+            </div>
+            <button class="btn-analyze" onclick="processText()">วิเคราะห์</button>
+        </div>
+
+        <div class="analysis-card">
+            <div class="analysis-header">🔍 วิเคราะห์ฉันทลักษณ์กลอนแปด</div>
+            <div class="analysis-body">
+                <div id="warrakResult"></div>
+                <div id="rhymeNeedBox" style="display:none;" class="rhyme-need-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-column-wrapper">
+        <div class="suggestion-column">
+            <div class="suggestion-header">คำไวพจน์ที่แนะนำ</div>
+            <div class="word-grid" id="synonymGrid">
+                <div class="no-data">เลือกคำเพื่อดูคำแนะนำ</div>
+            </div>
+            <div class="blue-divider">กลุ่มเสียงสระ</div>
+            <div class="word-grid" id="rhymeGrid">
+                <div class="no-data">—</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const WARRAK_NAMES = ['วรรคสดับ', 'วรรครับ', 'วรรครอง', 'วรรคส่ง'];
+const WARRAK_KEYS  = ['sadap', 'rab', 'rong', 'song'];
+const WARRAK_POS   = ['ซ้ายบรรทัด 1', 'ขวาบรรทัด 1', 'ซ้ายบรรทัด 2', 'ขวาบรรทัด 2'];
+
+let allWarraks   = [];
+let allRhymes    = {};
+let allEndWords  = {};
+let allMiddleWords = {};
+let plainTextBackup = '';
+
+function getPlainText() {
+    return document.getElementById('inputText').innerText;
+}
+
+function splitToWarraks(text) {
+    const lines = text.split('\n').filter(l => l.trim() !== '');
+    const warraks = [];
+    lines.forEach(line => {
+        const parts = line.split(/\t|\s{3,}/).map(p => p.trim()).filter(p => p !== '');
+        if (parts[0]) warraks.push(parts[0]);
+        if (parts[1]) warraks.push(parts[1]);
+    });
+    return warraks;
+}
+
+// ดึงคำลงท้าย
+function getLastWord(warrakText) {
+    if (!warrakText) return '';
+    const clean = warrakText.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+    
+    if (clean.length > 3) {
+        return clean.substring(clean.length - 2); 
+    }
+    return clean;
+}
+
+function getMiddleWord(warrakText) {
+    if (!warrakText) return '';
+    const clean = warrakText.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '');
+    if (clean.length >= 5) {
+        return clean.substring(2, 4);
+    }
+    return '';
+}
+
+function emphasizeWord(text, word) {
+    if (!word || !text) return text;
+    const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(escaped, 'g'), `<span class="emphasis">${word}</span>`);
+}
+
+let analyzedDataGlobal = [];
+
+// อันนี้ทาสีตรงสัมผัสแดง-น้ำเงิน
+function highlightInEditor() {
+    const el = document.getElementById('inputText');
+    if (!plainTextBackup.trim() || analyzedDataGlobal.length === 0) return;
+
+    const lines = plainTextBackup.split('\n');
+    let finalHtmlLines = [];
+    let currentWarrakGlobalIdx = 0;
+
+    lines.forEach(line => {
+        const parts = line.split(/\t|\s{3,}/);
+        let renderedParts = [];
+
+        parts.forEach(part => {
+            let trimmed = part.trim();
+            if (!trimmed) {
+                renderedParts.push(part);
+                return;
+            }
+
+            let wIdx = currentWarrakGlobalIdx;
+            let stanzaBase = Math.floor(wIdx / 4) * 4;
+            let linePosition = wIdx % 4;
+
+            let htmlResult = trimmed;
+            let currentInfo = analyzedDataGlobal[wIdx];
+
+            if (!currentInfo) {
+                renderedParts.push(part);
+                currentWarrakGlobalIdx++;
+                return;
+            }
+
+            function injectSpan(text, targetWord, className) {
+                if (!targetWord || !text.includes(targetWord)) return text;
+                let idx = text.lastIndexOf(targetWord);
+                if (idx === -1) return text;
+                return text.substring(0, idx) + `<span class="${className}">${targetWord}</span>` + text.substring(idx + targetWord.length);
+            }
+
+            // สัมผัสนอกสีแดง
+            if (linePosition === 0) {
+                htmlResult = injectSpan(htmlResult, currentInfo.last_word, 'hl-outside');
+            }
+            else if (linePosition === 1) {
+                const syls = currentInfo.syllables || [];
+                if (syls[2]) htmlResult = injectSpan(htmlResult, syls[2], 'hl-outside');
+                //if (syls[4]) htmlResult = injectSpan(htmlResult, syls[7], 'hl-outside');
+                if (currentInfo.last_word) htmlResult = injectSpan(htmlResult, currentInfo.last_word, 'hl-outside');
+            }
+            else if (linePosition === 2) {
+                htmlResult = injectSpan(htmlResult, currentInfo.last_word, 'hl-outside');
+            }
+            else if (linePosition === 3) {
+                const syls = currentInfo.syllables || [];
+                if (syls[2]) htmlResult = injectSpan(htmlResult, syls[2], 'hl-outside');
+               // if (syls[4]) htmlResult = injectSpan(htmlResult, syls[4], 'hl-outside');
+                if (currentInfo.last_word) htmlResult = injectSpan(htmlResult, currentInfo.last_word, 'hl-outside');
+            }
+            // สัมผัสระหว่างบทสีน้ำเงิน
+            if (linePosition === 3) {
+                let nextRab = analyzedDataGlobal[stanzaBase + 5];
+                if (nextRab && currentInfo.rhyme === nextRab.rhyme) {
+                    htmlResult = injectSpan(htmlResult, currentInfo.last_word, 'hl-song-end');
+                }
+            }
+            if (linePosition === 1 && stanzaBase >= 4) {
+                let prevSong = analyzedDataGlobal[stanzaBase - 1];
+                if (prevSong && currentInfo.rhyme === prevSong.rhyme) {
+                    htmlResult = injectSpan(htmlResult, currentInfo.last_word, 'hl-between');
+                }
+            }
+            renderedParts.push(htmlResult);
+            currentWarrakGlobalIdx++;
+        });
+
+        let separator = line.includes('\t') ? '\t' : '   ';
+        finalHtmlLines.push(renderedParts.join(separator));
+    });
+
+    el.innerHTML = finalHtmlLines.join('<br>');
+}
+
+async function processText() {
+    const text = getPlainText();
+    const resultBox = document.getElementById('warrakResult');
+    if (!text.trim()) return;
+
+    plainTextBackup = text;
+    allWarraks = splitToWarraks(text);
+
+    if (allWarraks.length < 4) {
+        resultBox.innerHTML = `
+        <div class="error-box">
+            <div class="error-box-title">⚠️ พบเพียง ${allWarraks.length} วรรค — ต้องมีอย่างน้อย 4 วรรค</div>
+            <div class="error-box-detail">วิธีพิมพ์: ใช้ Tab หรือเว้นวรรค 3 ครั้ง เพื่อแยกวรรคซ้าย-ขวา</div>
+        </div>`;
+        return;
+    }
+    // ดึงจำนวนพยางค์รายบรรทัด
+    let counts = [];
+    try {
+        const res = await fetch('/count-syllables', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: allWarraks.join('\n') })
+        });
+        counts = await res.json();
+    } catch(e) {
+        resultBox.innerHTML = '<div class="error-box"><div class="error-box-title">❌ เกิดข้อผิดพลาดในการนับพยางค์</div></div>';
+        return;
+    }
+    // เรียก API
+    try {
+        const resv2 = await fetch('/analyze-klon-v2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ warraks: allWarraks })
+        });
+        analyzedDataGlobal = await resv2.json();
+    } catch(e) {
+        resultBox.innerHTML = '<div class="error-box"><div class="error-box-title">❌ เกิดข้อผิดพลาดในการวิเคราะห์สัมผัส</div></div>';
+        return;
+    }
+    // สั่งรันฟังก์ชันตอนเราไฮไลท์
+    highlightInEditor();
+    // อันนี้สรุปสัมผัสตอนท้าย
+    let html = '<div>';
+    for (let stanzaIdx = 0; stanzaIdx < allWarraks.length; stanzaIdx += 4) {
+        if (stanzaIdx + 3 >= allWarraks.length) break;
+        const indices  = [stanzaIdx, stanzaIdx+1, stanzaIdx+2, stanzaIdx+3];
+        const stanzaNum = (stanzaIdx / 4) + 1;
+
+        html += `<div class="stanza-group">`;
+        if (stanzaNum > 1) html += `<div class="stanza-title">บท ${stanzaNum}</div>`;
+
+        [0,1,2,3].forEach(k => {
+            const idx  = indices[k];
+            const key  = WARRAK_KEYS[k];
+            const name = WARRAK_NAMES[k];
+            const pos  = WARRAK_POS[k];
+            const cnt  = counts[idx] || 0;
+            const ok   = cnt >= 7 && cnt <= 9;
+
+            let display = allWarraks[idx] || '—';
+            let info = analyzedDataGlobal[idx];
+            
+            /*if (info) {
+                if (info.last_word) display = emphasizeWord(display, info.last_word);
+                if (info.middle_words) {
+                    info.middle_words.forEach(midW => { display = emphasizeWord(display, midW); });
+                }
+            }*/
+
+            html += `
+            <div class="warrak-box ${key}">
+                <div class="warrak-title">
+                    <span class="warrak-name ${key}">${name}</span>
+                    <span class="syllable-badge ${ok ? '' : 'bad'}">${ok ? '✓' : '✗'} ${cnt} พยางค์</span>
+                </div>
+                <div class="warrak-text">${display}</div>
+                <div class="warrak-meta">${pos}</div>
+            </div>`;
+        });
+
+        let s0 = analyzedDataGlobal[indices[0]];
+        let s1 = analyzedDataGlobal[indices[1]];
+        let s2 = analyzedDataGlobal[indices[2]];
+        let s3 = analyzedDataGlobal[indices[3]];
+        let nextRabIdx = stanzaIdx + 4 + 1;
+        let sNextRab = analyzedDataGlobal[nextRabIdx];
+
+        // ดึงผลที่สัมผัสออกมาจากหลังบ้านมาเช็ค
+        const ro1 = s0 && s1 && s1.middle_rhymes && s1.middle_rhymes[0] === s0.rhyme;
+        const ro2 = s1 && s2 && s1.rhyme === s2.rhyme;
+        const ro3 = s2 && s3 && s3.middle_rhymes && s3.middle_rhymes[0] === s2.rhyme;
+        const rb = s3 && sNextRab && s3.rhyme === sNextRab.rhyme;
+
+        let r1MiddleHint = s1 && s1.middle_words ? s1.middle_words.join(' หรือ ') : '—';
+        let r3MiddleHint = s3 && s3.middle_words ? s3.middle_words.join(' หรือ ') : '—';
+
+        html += `
+        <div class="rhyme-summary">
+            <div class="summary-title"> สรุปการสัมผัสบทที่ ${stanzaNum}</div>
+            <div class="rhyme-type">
+                <div class="rhyme-dot outside"></div>
+                <strong style="min-width:60px;">สัมผัสนอก (1):</strong>
+                <span>ท้ายวรรคสดับ <strong>${s0?s0.last_word:'—'}</strong> (${s0?s0.rhyme:'—'}) → พยางค์ที่ 3 วรรครับ [<strong>${s1&&s1.syllables?s1.syllables[2]:'—'}</strong>]</span>
+                <span class="status-badge ${ro1?'ok':'error'}">${ro1?'✓':'✗'}</span>
+            </div>
+            <div class="rhyme-type">
+                <div class="rhyme-dot outside"></div>
+                <strong style="min-width:60px;">สัมผัสนอก (2):</strong>
+                <span>ท้ายวรรครับ <strong>${s1?s1.last_word:'—'}</strong> (${s1?s1.rhyme:'—'}) → ท้ายวรรครอง <strong>${s2?s2.last_word:'—'}</strong> (${s2?s2.rhyme:'—'})</span>
+                <span class="status-badge ${ro2?'ok':'error'}">${ro2?'✓':'✗'}</span>
+            </div>
+            <div class="rhyme-type">
+                <div class="rhyme-dot outside"></div>
+                <strong style="min-width:60px;">สัมผัสนอก (3):</strong>
+                <span>ท้ายวรรครอง <strong>${s2?s2.last_word:'—'}</strong> (${s2?s2.rhyme:'—'}) → พยางค์ที่ 3 วรรคส่ง [<strong>${s3&&s3.syllables?s3.syllables[2]:'—'}</strong>]</span>
+                <span class="status-badge ${ro3?'ok':'error'}">${ro3?'✓':'✗'}</span>
+            </div>
+            <div class="rhyme-type">
+                <div class="rhyme-dot between"></div>
+                <strong style="min-width:60px;">สัมผัสระหว่างบท:</strong>
+                <span>ท้ายวรรคส่ง <strong>${s3?s3.last_word:'—'}</strong> (${s3?s3.rhyme:'—'}) → ท้ายวรรครับบทถัดไป <strong>${sNextRab?sNextRab.last_word:'(ยังไม่มี)'}</strong></span>
+                <span class="status-badge ${rb?'ok':'error'}">${rb?'✓':(sNextRab?'✗':'—')}</span>
+            </div>
+        </div>`;
+
+        html += '</div>';
+    }
+    html += '</div>';
+    resultBox.innerHTML = html;
+}
+
+function replaceSelectedWord(newWord) {
+    if (!savedRange) return;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(savedRange);
+    document.execCommand('insertText', false, newWord);
+    savedRange = null;
+    plainTextBackup = document.getElementById('inputText').innerText;
+}
+function getFinalConsonant(word) {
+    if (!word) return '';
+    return word.trim().slice(-1);
+}
+let savedRange = null;
+
+async function handleSelection() {
+    const selection = window.getSelection();
+    const sel = selection ? selection.toString().trim() : '';
+    if (!sel) return;
+    if (selection.rangeCount > 0) {
+        savedRange = selection.getRangeAt(0).cloneRange();
+    }
+
+    const synBox   = document.getElementById('synonymGrid');
+    const rhymeBox = document.getElementById('rhymeGrid');
+    synBox.innerHTML   = '<div class="no-data">กำลังโหลด...</div>';
+    rhymeBox.innerHTML = '<div class="no-data">กำลังโหลด...</div>';
+
+    try {
+        const res  = await fetch(`/word-details?word=${encodeURIComponent(sel)}`);
+        const data = await res.json();
+
+let synonymList = [];
+if (Array.isArray(data.synonyms)) {
+    synonymList = data.synonyms; 
+} else if (typeof data.synonyms === 'string' && data.synonyms) {
+    synonymList = data.synonyms.split(',').map(w => ({ word: w.trim(), rhyme: null }));
+}
+
+let syllableCounts = [];
+try {
+    const allWords = [sel, ...synonymList.map(i => i.word)].join('\n');
+    const cntRes = await fetch('/count-syllables', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: allWords })
+    });
+    syllableCounts = await cntRes.json();
+} catch(e) {}
+
+const selSyllableCount = syllableCounts[0] || 0;
+
+synBox.innerHTML = '';
+if (synonymList.length > 0) {
+    const originalRhyme = data.rhyme;
+    const greenPills = [];
+    const whitePills = [];
+
+    synonymList.forEach((item, idx) => {
+        const itemSyllableCount = syllableCounts[idx + 1] || 0;
+        const sameRhyme     = originalRhyme && item.rhyme && item.rhyme === originalRhyme;
+        const sameSyllables = selSyllableCount > 0 && itemSyllableCount === selSyllableCount;
+
+        const pill = document.createElement('div');
+        pill.className   = 'word-pill';
+        pill.textContent = item.word;
+        pill.onclick     = () => replaceSelectedWord(item.word);
+        
+        let targetRhyme = null;
+        for (let i = 0; i < analyzedDataGlobal.length; i++) {
+            const info = analyzedDataGlobal[i];
+            if (info && (info.last_word === sel || (info.syllables && info.syllables.includes(sel)))) {
+            const pos = i % 4;
+        if (pos === 0) targetRhyme = analyzedDataGlobal[i]?.rhyme;
+        else if (pos === 1) targetRhyme = analyzedDataGlobal[i]?.rhyme;
+        else if (pos === 2) targetRhyme = analyzedDataGlobal[i]?.rhyme;
+        else if (pos === 3) targetRhyme = analyzedDataGlobal[i]?.rhyme;
+        break;
+        }
+    }
+        const sameFinal = getFinalConsonant(sel) === getFinalConsonant(item.word);
+        const matchesTarget = targetRhyme && item.rhyme && item.rhyme === targetRhyme;
+        
+        if (matchesTarget && sameSyllables) {
+            pill.style.backgroundColor = '#d4edda';
+            pill.style.color           = '#155724';
+            pill.style.borderColor     = '#c3e6cb';
+            greenPills.push(pill);
+        } else {
+            whitePills.push(pill);
+        }
+});
+
+    greenPills.forEach(p => synBox.appendChild(p));
+    whitePills.forEach(p => synBox.appendChild(p));
+
+    if (greenPills.length === 0 && whitePills.length === 0) {
+        synBox.innerHTML = '<div class="no-data">(ไม่พบข้อมูล)</div>';
+    }
+} else {
+    synBox.innerHTML = '<div class="no-data">(ไม่พบข้อมูล)</div>';
+}
+
+        rhymeBox.innerHTML = '';
+        if (data.rhyme && data.rhyme !== 'ไม่พบรูปสระ' && data.rhyme !== 'ไม่ระบุ') {
+            const pill = document.createElement('div');
+            pill.className   = 'word-pill';
+            pill.textContent = data.rhyme;
+            rhymeBox.appendChild(pill);
+        } else {
+            rhymeBox.innerHTML = '<div class="no-data">(ไม่พบข้อมูล)</div>';
+        }
+    } catch(e) {
+        synBox.innerHTML = '<div class="no-data" style="color:#c00">เชื่อมต่อผิดพลาด</div>';
+    }
+}
+</script>
+</body>
+</html>
