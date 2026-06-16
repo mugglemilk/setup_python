@@ -502,10 +502,29 @@ function toggleTheme() {
 applyTheme(localStorage.getItem('thai-theme') || 'dark');
 ////อันนี้จะทำไฮไลท์ให้มันแสดงคำไวพจน์ในระบบ จุด 1
 // ── Synonym lookup ──
+document.getElementById('poemInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    document.execCommand('insertText', false, '\t');
+  }
+});
+
+let _savedSel = { start: 0, end: 0 };
+
 document.getElementById('poemInput').addEventListener('mouseup', function() {
   const selected = window.getSelection().toString().trim();
-  if (selected) window.fetchSynonyms(selected);
+  if (selected) {
+    _savedSel = { start: this.selectionStart, end: this.selectionEnd };
+    window.fetchSynonyms(selected);
+  }
 });
+
+function replaceSelection(word) {
+  const ta = document.getElementById('poemInput');
+  ta.focus();
+  ta.setSelectionRange(_savedSel.start, _savedSel.end);
+  document.execCommand('insertText', false, word);
+}
 
 window.fetchSynonyms = async function(word) {
   const box = document.getElementById('synonymSuggestions');
@@ -522,7 +541,7 @@ window.fetchSynonyms = async function(word) {
       const recList = sorted.filter(s => recommended.has(s));
       const restList = sorted.filter(s => !recommended.has(s));
       box.innerHTML = [...recList, ...restList].map(s =>
-        `<span class="syn-tag${recommended.has(s) ? ' syn-recommended' : ''}" onclick="navigator.clipboard.writeText('${s.replace(/'/g,"&#39;")}')">${s}</span>`
+        `<span class="syn-tag${recommended.has(s) ? ' syn-recommended' : ''}" onclick="replaceSelection('${s.replace(/'/g,"&#39;")}')">${s}</span>`
       ).join(''); // เอาไว้บนสุดจุบ 7
       
   //   const recommended = new Set(data.recommended || []);
@@ -533,6 +552,34 @@ window.fetchSynonyms = async function(word) {
     box.innerHTML = `<span style="color:var(--err);font-size:0.85rem">โหลดไม่ได้</span>`;
   }
 } //ถึงตรงนี้ของจุดที่ 1
+
+// ── Auto-analyze (trigger after first complete แถว, then per วรรค) ──
+let autoTimer = null;
+
+document.getElementById('poemInput').addEventListener('input', function() {
+  clearTimeout(autoTimer);
+  const text = this.value;
+  const trimmed = text.trim();
+
+  if (!trimmed) {
+    document.getElementById('result').innerHTML = '';
+    return;
+  }
+
+  const lines = text.split('\n');
+  const firstLine = lines[0];
+
+  // ตรวจว่าเริ่มพิมพ์วรรคที่ 2 แล้ว (มีตัวอักษรหลัง separator: tab หรือ 2+ spaces)
+  const waks = firstLine.split(/\t|\s{2,}/);
+  const startedWak2 = waks.length >= 2 && waks[1].trim().length > 0;
+
+  // หรือมีบรรทัดที่ 2 แล้ว (กรณีพิมพ์ต่อ)
+  const hasSecondLine = lines.length >= 2 && firstLine.trim().length > 0;
+
+  if (startedWak2 || hasSecondLine) {
+    autoTimer = setTimeout(analyze, 100);
+  }
+});
 
 // ── Render helpers ──
  function renderWord(w) {
@@ -647,6 +694,7 @@ async function analyze() {
 function clearAll() {
   document.getElementById('poemInput').value = '';
   document.getElementById('result').innerHTML = '';
+  document.getElementById('synonymSuggestions').innerHTML = '';
 }
 </script>
 </body>

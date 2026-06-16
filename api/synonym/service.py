@@ -1,12 +1,14 @@
 from .repository import SynonymRepository
-from api.poem.service import _get_rhyme_key, _syllabify #อันนี้เอามาทำ tag แนะนำคำไวพจน์สีเขียวจุดที่ 1
+from api.poem.service import _rhymes, _syllabify #อันนี้เอามาทำ tag แนะนำคำไวพจน์สีเขียวจุดที่ 1
 
 def _is_recommended(source, candidate):#อันนี้เอามาทำ tag แนะนำคำไวพจน์สีเขียวจุดที่ 2
     src_syls = _syllabify(source)
     cand_syls = _syllabify(candidate)
+    if not src_syls or not cand_syls:
+        return False
     if len(src_syls) != len(cand_syls):
         return False
-    return _get_rhyme_key(src_syls[-1]) == _get_rhyme_key(cand_syls[-1]) #อันนี้เอามาทำ tag แนะนำคำไวพจน์สีเขียวจุดที่ 2
+    return _rhymes(src_syls[-1], cand_syls[-1]) #อันนี้เอามาทำ tag แนะนำคำไวพจน์สีเขียวจุดที่ 2
 
 class SynonymService:
     def __init__(self, repo: SynonymRepository):

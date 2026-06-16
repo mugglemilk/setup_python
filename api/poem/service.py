@@ -40,6 +40,7 @@ VOWEL_RULES: list[tuple[re.Pattern, str]] = [
     (re.compile(rf'เ{_C}{_T}า'),            'เอา'),
     (re.compile(rf'เ{_C}{{1,2}}{_T}{_C}{{1,2}}(?:์)?'), 'เอะ'),
     (re.compile(r'ะ'),  'อะ'),
+    (re.compile(r'ั'),  'อะ'),   # sara a ย่อ (กัน วัน มัน) — เสียงเดียวกับ ะ ก่อนตัวสะกด
     (re.compile(r'า'),  'อา'),
     (re.compile(r'ิ'),  'อิ'),
     (re.compile(r'ี'),  'อี'),
@@ -67,6 +68,9 @@ CLUSTERS = {
     ('ผ','ล'),('พ','ร'),('พ','ล'),('พ','ว'),
     ('ส','ร'),('ต','ร'),
 }
+
+# อักษรต่ำ — ตัวที่รับ อักษรนำ ได้ (เสมือน, สมาน, สยาม ฯลฯ)
+_LOW_CLASS = set('งคฅฆชซฌญฑณทธนพฟภมยรลวฬ')
 
 
 # ─── rhyme key ────────────────────────────────────────────────────────────────
@@ -161,10 +165,18 @@ def _syllabify(text: str) -> list[str]:
 
     expanded: list[tuple[str, bool]] = []
     for s in raw:
+        # อักษรนำ + leading vowel: เ/แ/โ/ไ/ใ + อักษรนำ + อักษรต่ำ + (มีสระ)
+        # เช่น เสมือน → ส + เมือน, เสมอ, เสนาะ
+        if (len(s) >= 4 and s[0] in LEADING_VOWELS and s[1] in THAI_CONS
+                and s[1] not in ('ห', 'อ') and s[2] in _LOW_CLASS
+                and (s[1], s[2]) not in CLUSTERS
+                and any(v in s[2:] for v in VOWELS)):
+            expanded.append((s[1], True))
+            expanded.append((s[0] + s[2:], False))
         # Split syllables that begin with leading-vowel + two non-cluster consonants.
         # Guard: skip if len==3 and last char is a valid final consonant —
         # that means it IS a proper single syllable like แสน เกด โจน.
-        if (len(s) >= 3 and s[0] in LEADING_VOWELS and s[1] in THAI_CONS
+        elif (len(s) >= 3 and s[0] in LEADING_VOWELS and s[1] in THAI_CONS
                 and s[1] != 'ห' and s[2] in THAI_CONS
                 and (s[1], s[2]) not in CLUSTERS
                 and not any(v in s[1:] for v in VOWELS)
