@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ไทยซิม — พจนานุกรม</title>
+<title>ตารางแสดงคำศัพท์</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -273,11 +273,11 @@
 <body>
 
 <nav class="navbar">
-  <a class="nav-brand" href="/">ไทยซิม</a>
+  <a class="nav-brand" href="/">พ้องความหมาย</a>
   <div class="nav-links">
     <a href="/" class="nav-link">ค้นหาคำพ้อง</a>
-    <a href="/dictionary" class="nav-link active">พจนานุกรม</a>
-    <a href="/poem" class="nav-link">วิเคราะห์กลอน</a>
+    <a href="/dictionary" class="nav-link active">ตารางแสดงคำศัพท์</a>
+    <a href="/poem" class="nav-link">แต่งกลอนแปด</a>
   </div>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
     <span id="themeIcon">☀</span><span id="themeLabel">โหมดสว่าง</span>
@@ -365,6 +365,14 @@ function applyFilter() {
     e.synonyms.some(s => s.toLowerCase().includes(q))
   ) : [...allEntries];
   entries.sort((a, b) => {
+    if (q) {
+    const aExact = a.word.toLowerCase() === q;
+    const bExact = b.word.toLowerCase() === q;
+    const aStart = a.word.toLowerCase().startsWith(q);
+    const bStart = b.word.toLowerCase().startsWith(q);
+    if (aExact !== bExact) return aExact ? -1 : 1;
+    if (aStart !== bStart) return aStart ? -1 : 1;
+  }
     const cmp = a.word.localeCompare(b.word, 'th');
     return dir === 'asc' ? cmp : -cmp;
   });

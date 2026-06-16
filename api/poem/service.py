@@ -206,8 +206,13 @@ def _split_halves(line: str) -> tuple[str, str]:
     if m:
         return line[:m.start()].strip(), line[m.end():].strip()
     syls = _syllabify(line)
-    mid = len(syls) // 2
-    return ''.join(syls[:mid]), ''.join(syls[mid:])
+    for i in range(7, min(10, len(syls))):
+        right = syls[i:]
+        if len(right) >= 7:
+            return ''.join(syls[:i]), ''.join(right)
+    return ''.join(syls), ''    
+    # mid = len(syls) // 2
+    # return ''.join(syls[:mid]), ''.join(syls[mid:])
 
 
 # ─── rhyme position check ─────────────────────────────────────────────────────
@@ -262,9 +267,9 @@ def analyze(text: str) -> dict:
                            'message': f'ส่งระหว่างบท: "{prev_h4_syl}" ควรสัมผัสกับ "{last[1]}" (ท้ายวรรครับ)'})
         for i, syls in enumerate(h_syls):
             n = len(syls)
-            if n < 6 or n > 10:
+            if n < 7 or n > 9:
                 issues.append({'type': 'warn',
-                               'message': f'{HALF_NAMES[i]}: {n} พยางค์ (ควร 8–9 พยางค์)'})
+                               'message': f'{HALF_NAMES[i]}: {n} พยางค์ (ควร 7–9 พยางค์)'})
 
         # Pre-compute tooltip texts for r-bad positions
         tip_h1 = (f'ท้ายวรรคสดับ "{last[0]}" ควรสัมผัสกับพยางค์ที่ 3 หรือ 5 ของวรรครับ'
@@ -317,13 +322,13 @@ def analyze(text: str) -> dict:
                     cls = 'r-ton'
                 if hi == 3 and ir3_ok and wi == ir3_idx:
                     cls = 'r-ton'
-                ann.append({'word': s, 'cls': cls, 'tip': tip})
+                ann.append({'word': s, 'cls': cls, 'tip': tip}) 
             annotations.append(ann)
 
         stanzas.append({
             'index': si // 2,
             'halves': [
-                {'name': HALF_NAMES[i], 'syllables': h_syls[i], 'count': len(h_syls[i])}
+                 {'name': HALF_NAMES[i], 'syllables': h_syls[i], 'count': len(h_syls[i])} 
                 for i in range(4)
             ],
             'last_syls': last,

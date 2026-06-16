@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>วิเคราะห์กลอน ๘</title>
+<title>แต่งกลอนแปด</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -128,8 +128,29 @@
     font-weight: 300;
   }
 
-  .container { max-width: 920px; margin: 0 auto; padding: 28px 24px 72px; }
-
+  /* .container { max-width: 920px; margin: 0 auto; padding: 28px 24px 72px; } */
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 28px 24px 72px; 
+      display: flex; 
+      gap: 20px; 
+      align-items: flex-start; 
+    }
+    .main-col { 
+      flex: 1; 
+      min-width: 0; 
+    }
+    .side-col { 
+      width: 280px; 
+      flex-shrink: 0; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 14px;
+      padding-top: 104px;
+      align-self: stretch;
+    }
+  
   /* ── Input card ── */
   .input-card {
     background: var(--surface);
@@ -140,6 +161,10 @@
     margin-bottom: 14px;
     transition: background var(--trans);
   }
+  .side-col .input-card {
+  flex: 1;
+  margin-bottom: 0;
+}
   textarea {
     width: 100%;
     height: 155px;
@@ -234,8 +259,33 @@
     padding: 3px 10px;
     transition: background var(--trans);
   }
-  .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-
+  .swatch { 
+    display: inline-block; 
+    width: 9px; 
+    height: 9px; 
+    border-radius: 50%; 
+    flex-shrink: 0; 
+  }
+  /* อันนี้จะทำไฮไลท์ให้มันแสดงคำไวพจน์ในระบบ จุด 2 */
+  .syn-tag {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.syn-tag:hover { 
+  border-color: var(--accent); 
+  color: var(--accent); 
+} /*ถึงตรงนี้ของจุดที่ 2*/
+.syn-recommended { /*เริ่ม 5*/
+  background: rgba(74,222,128,0.15); 
+  border-color: #4ade80; 
+  color: #4ade80; 
+} /*อันนี้ทำ tag สีเขียวคำไวพจนืที่แนะนำ 5*/
   /* ── Result ── */
   .stanza {
     background: var(--surface);
@@ -277,19 +327,19 @@
   }
 
   /* ── Rhyme highlights (dark default) ── */
-  .r-sut    { background: rgba(184,125,255,0.14); border-bottom: 2px solid #b87dff; border-radius: 3px; padding: 0 2px; }
-  .r-nai    { background: rgba(255,107,122,0.14); border-bottom: 2px solid #ff6b7a; border-radius: 3px; padding: 0 2px; }
+  .r-sut    { background: rgba(91,156,246,0.14); border-bottom: 2px solid #5b9cf6; border-radius: 3px; padding: 0 2px; }
+  .r-nai    { background: rgba(91,156,246,0.14); border-bottom: 2px solid #5b9cf6; border-radius: 3px; padding: 0 2px; }
   .r-son    { background: rgba(78,203,141,0.14);  border-bottom: 2px solid #4ecb8d; border-radius: 3px; padding: 0 2px; }
   .r-ton    { background: rgba(91,156,246,0.14);  border-bottom: 2px solid #5b9cf6; border-radius: 3px; padding: 0 2px; }
-  .r-bad    { background: rgba(255,204,0,0.11);   border-bottom: 2px dashed #ffcc00; border-radius: 3px; padding: 0 2px; }
+  .r-bad    { background: rgba(255,107,122,0.14);   border-bottom: 2px dashed #ff6b7a; border-radius: 3px; padding: 0 2px; }
   .word-err { background: rgba(255,68,68,0.11);   border-bottom: 2px dashed #ff4444; border-radius: 3px; padding: 0 2px; }
 
   /* ── Rhyme highlights (light) ── */
-  [data-theme="light"] .r-sut    { background: rgba(139,47,207,0.09); border-bottom-color: #8b2fcf; }
-  [data-theme="light"] .r-nai    { background: rgba(201,39,52,0.09);  border-bottom-color: #c92734; }
+  [data-theme="light"] .r-sut    { background: rgba(29,78,216,0.09); border-bottom-color: #1d4ed8; }
+  [data-theme="light"] .r-nai    { background: rgba(29,78,216,0.09);  border-bottom-color: #1d4ed8; }
   [data-theme="light"] .r-son    { background: rgba(22,101,52,0.09);  border-bottom-color: #166534; }
   [data-theme="light"] .r-ton    { background: rgba(29,78,216,0.09);  border-bottom-color: #1d4ed8; }
-  [data-theme="light"] .r-bad    { background: rgba(180,130,0,0.09);  border-bottom-color: #a36200; }
+  [data-theme="light"] .r-bad    { background: rgba(201,39,52,0.09);  border-bottom-color: #c92734; }
   [data-theme="light"] .word-err { background: rgba(185,28,28,0.09);  border-bottom-color: #b91c1c; }
 
   /* ── Rhyme report ── */
@@ -371,11 +421,11 @@
 <body>
 
 <nav class="navbar">
-  <a class="nav-brand" href="/">ไทยซิม</a>
+  <a class="nav-brand" href="/">พ้องความหมาย</a>
   <div class="nav-links">
     <a href="/" class="nav-link">ค้นหาคำพ้อง</a>
-    <a href="/dictionary" class="nav-link">พจนานุกรม</a>
-    <a href="/poem" class="nav-link active">วิเคราะห์กลอน</a>
+    <a href="/dictionary" class="nav-link">ตารางแสดงคำศัพท์</a>
+    <a href="/poem" class="nav-link active">แต่งกลอนแปด</a>
   </div>
   <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
     <span id="themeIcon">☀</span><span id="themeLabel">โหมดสว่าง</span>
@@ -383,9 +433,10 @@
 </nav>
 
 <div class="container">
+<div class="main-col">
 
   <div class="header">
-    <h1>วิเคราะห์กลอน ๘</h1>
+    <h1>แต่งกลอนแปด</h1>
   </div>
   <p class="subtitle">วางบทกลอนแล้วกด "วิเคราะห์" — ระบบจะตรวจฉันทลักษณ์และไฮไลท์คำสัมผัส</p>
 
@@ -401,15 +452,38 @@
   </div>
 
   <div class="legend">
-    <span class="legend-label">สัมผัส</span>
-    <div class="legend-item"><span class="swatch" style="background:#b87dff"></span> ท้ายวรรคสดับ</div>
-    <div class="legend-item"><span class="swatch" style="background:#ff6b7a"></span> ท้ายวรรครับ / วรรครอง</div>
-    <div class="legend-item"><span class="swatch" style="background:#4ecb8d"></span> ท้ายวรรคส่ง</div>
-    <div class="legend-item"><span class="swatch" style="background:#5b9cf6"></span> คำที่ 3/5 รับสัมผัสใน</div>
-    <div class="legend-item"><span class="swatch" style="background:#ffcc00"></span> สัมผัสไม่ตรง</div>
+    <!-- <span class="legend-label">สัมผัส</span>
+    <div class="legend-item"><span class="swatch" style="background:#b87dff"></span> สัมผัสนอก</div>
+    <div class="legend-item"><span class="swatch" style="background:#ffcc00"></span> สัมผัสนอก</div>  -->
+   <div class="legend-item"><span class="swatch" style="background:#5b9cf6"></span> สัมผัสนอก</div>
+    <div class="legend-item"><span class="swatch" style="background:#4ecb8d"></span> สัมผัสระหว่างบท</div>
+
+    <div class="legend-item"><span class="swatch" style="background:#ff6b7a"></span> สัมผัสไม่ตรง</div>
   </div>
 
-  <div id="result"></div>
+ <div id="result"></div>
+
+</div> <!-- end main-col -->
+
+<div class="side-col">
+  <div class="input-card">
+    <!-- <div style="font-size:0.8rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px">คำไวพจน์ที่แนะนำ</div> -->
+    <div style="font-size:0.8rem;
+                font-weight:600;
+                color:var(--accent);
+                text-transform:uppercase;
+                letter-spacing:0.8px;
+                margin:-20px -20px 12px -20px;
+                padding:12px 20px;
+                background:var(--surface2);
+                border-radius:var(--radius) var(--radius) 0 0;
+                border-bottom:1px solid var(--border)">คำไวพจน์ที่แนะนำ
+      </div>
+    <div id="synonymSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;">
+      <!-- จะ populate ทีหลัง -->
+    </div>
+  </div>
+</div>
 </div>
 
 <script>
@@ -421,18 +495,52 @@ function applyTheme(theme) {
   document.getElementById('themeLabel').textContent = dark ? 'โหมดสว่าง' : 'โหมดมืด';
   localStorage.setItem('thai-theme', theme);
 }
+
 function toggleTheme() {
   applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 }
 applyTheme(localStorage.getItem('thai-theme') || 'dark');
+////อันนี้จะทำไฮไลท์ให้มันแสดงคำไวพจน์ในระบบ จุด 1
+// ── Synonym lookup ──
+document.getElementById('poemInput').addEventListener('mouseup', function() {
+  const selected = window.getSelection().toString().trim();
+  if (selected) window.fetchSynonyms(selected);
+});
+
+window.fetchSynonyms = async function(word) {
+  const box = document.getElementById('synonymSuggestions');
+  box.innerHTML = `<span style="color:var(--muted);font-size:0.85rem">กำลังโหลด…</span>`;
+  try {
+    const res = await fetch(`/api/synonym?word=${encodeURIComponent(word)}`);
+    const data = await res.json();
+    if (!data.synonyms || !data.synonyms.length) {
+      box.innerHTML = `<span style="color:var(--muted);font-size:0.85rem">ไม่พบคำไวพจน์</span>`;
+      return;
+    }
+      const recommended = new Set(data.recommended || []); //อันนี้เอามาทำ tag แนะนำคำไวพจน์สีเขียวจุดที่ 7 (เอาไว้บนสุด)
+      const sorted = [...data.synonyms].sort((a, b) => a.localeCompare(b, 'th'));
+      const recList = sorted.filter(s => recommended.has(s));
+      const restList = sorted.filter(s => !recommended.has(s));
+      box.innerHTML = [...recList, ...restList].map(s =>
+        `<span class="syn-tag${recommended.has(s) ? ' syn-recommended' : ''}" onclick="navigator.clipboard.writeText('${s.replace(/'/g,"&#39;")}')">${s}</span>`
+      ).join(''); // เอาไว้บนสุดจุบ 7
+      
+  //   const recommended = new Set(data.recommended || []);
+  //   box.innerHTML = [...data.synonyms].sort((a, b) => a.localeCompare(b, 'th')).map(s =>
+  //       `<span class="syn-tag${recommended.has(s) ? ' syn-recommended' : ''}" onclick="navigator.clipboard.writeText('${s.replace(/'/g,"&#39;")}')">${s}</span>`
+  // ).join('');
+  } catch(e) {
+    box.innerHTML = `<span style="color:var(--err);font-size:0.85rem">โหลดไม่ได้</span>`;
+  }
+} //ถึงตรงนี้ของจุดที่ 1
 
 // ── Render helpers ──
-function renderWord(w) {
-  if (!w.word) return '';
-  const cls = w.cls ? ` class="${w.cls}"` : '';
-  const tip = w.tip ? ` data-tip="${w.tip.replace(/"/g, '&quot;')}"` : '';
-  return `<span${cls}${tip}>${w.word}</span>`;
-}
+ function renderWord(w) {
+   if (!w.word) return '';
+   const cls = w.cls ? ` class="${w.cls}"` : '';
+   const tip = w.tip ? ` data-tip="${w.tip.replace(/"/g, '&quot;')}"` : '';
+   return `<span${cls}${tip}>${w.word}</span>`;
+ }
 
 function renderHalf(annotated) {
   return annotated.map(renderWord).join(' ');
@@ -479,7 +587,7 @@ function renderStanza(st) {
     html += `<div class="diagram"><h3>แผนผังสัมผัส</h3>
       <table>
         <tr>
-          <td>สัมผัสใน</td>
+          <td>สัมผัสนอก</td>
           <td><span class="r-sut">${A}</span> → <span class="r-ton">${ir1Word}</span> (คำที่ ${ir1.ok ? ir1.recv_idx + 1 : '?'} วรรครับ) ${statusIcon(ir1.ok)}</td>
         </tr>
         <tr>
@@ -487,7 +595,7 @@ function renderStanza(st) {
           <td><span class="r-nai">${B}</span> ↔ <span class="r-nai">${C}</span> ${statusIcon(nokOk)}</td>
         </tr>
         <tr>
-          <td>สัมผัสใน</td>
+          <td>สัมผัสนอก</td>
           <td><span class="r-nai">${C}</span> → <span class="r-ton">${ir3Word}</span> (คำที่ ${ir3.ok ? ir3.recv_idx + 1 : '?'} วรรคส่ง) ${statusIcon(ir3.ok)}</td>
         </tr>
         <tr>
