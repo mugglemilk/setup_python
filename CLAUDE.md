@@ -15,15 +15,16 @@ setup_python/
 ├── app.py                  # Flask app factory + page routes
 ├── requirements.txt        # Dependencies: flask, pythainlp
 │
-├── merged.csv              # ฐานข้อมูลคำพ้อง (ใช้ที่ runtime)
+├── synonyms.db             # SQLite DB (สร้างจาก database_setup.py)
 ├── data.csv                # ข้อมูลดิบ (word, pos, synonyms)
 ├── synonym.py              # กลุ่มคำพ้องเพิ่มเติม (Python list of lists)
 ├── merge.py                # Script รวม data.csv + synonym.py → merged.csv
+├── database_setup.py       # Script สร้าง synonyms.db จาก data.csv + synonym.py
 ├── blacklist.txt           # คำที่ไม่ต้องการใช้
 │
 ├── api/
 │   ├── synonym/
-│   │   ├── repository.py   # อ่าน merged.csv → dict lookup
+│   │   ├── repository.py   # query synonyms.db → lookup
 │   │   ├── service.py      # logic: lookup + คำนวณ recommended
 │   │   └── routes.py       # Blueprint: GET /api/synonym, /api/dictionary
 │   └── poem/
@@ -50,9 +51,12 @@ setup_python/
 
 ### ฐานข้อมูลคำพ้อง
 
-#### `merged.csv` (runtime DB)
-รูปแบบ: `word,pos,synonym1|synonym2|synonym3`
-- สร้างจาก `merge.py` — **ต้องรัน merge.py ใหม่ทุกครั้งที่แก้ data.csv หรือ synonym.py**
+#### `synonyms.db` (SQLite — runtime DB)
+มี 2 ตาราง:
+- `synonym_groups(group_id, source)` — แต่ละแถวคือกลุ่มคำพ้อง 1 กลุ่ม
+- `word_mappings(word, group_id)` — แต่ละคำ → อ้างอิง group_id
+
+สร้างจาก `database_setup.py` — **ต้องรัน database_setup.py ใหม่ทุกครั้งที่แก้ data.csv หรือ synonym.py**
 
 #### `data.csv` (raw data)
 รูปแบบ: `word,pos,synonym1|synonym2|...`
@@ -61,24 +65,29 @@ setup_python/
 Python list of lists: `[['คำ1', 'คำ2', 'คำ3'], ...]` แบ่งเป็นหมวดหมู่
 เช่น หมวดบุคคล, ธรรมชาติ, สัตว์, พืช, กริยา, ความรู้สึก, ลักษณะ
 
-#### `merge.py` (script)
-รวม data.csv + synonym.py → merged.csv:
+#### `database_setup.py` (script)
+รวม data.csv + synonym.py → synonyms.db โดยใช้ logic เดียวกับ merge.py:
 1. อ่าน data.csv เป็น dict
 2. อ่าน synonym.py เป็น groups
 3. Match กลุ่มที่มี word ตรงกัน → merge synonyms เข้าด้วยกัน
 4. Group ที่ไม่มีใน data.csv → เพิ่มเป็น entry ใหม่
-5. เขียน merged.csv
+5. บันทึกลง SQLite + สร้าง INDEX + ลบคำใน blacklist.txt
+
+#### `merge.py` (script เดิม — สำหรับ export CSV)
+รวม data.csv + synonym.py → merged.csv (ใช้สำหรับ reference เท่านั้น)
 
 ---
 
 ### `api/synonym/`
 
 #### `repository.py` — SynonymRepository
-- โหลด `merged.csv` ครั้งเดียวตอน init
-- สร้าง 2 dict:
-  - `_word_to_syns`: `{"คำหลัก": ["syn1", "syn2", ...]}`
-  - `_syn_to_word`: `{"syn1": "คำหลัก"}` (reverse lookup)
-- Methods: `get_synonyms(word)`, `get_canonical(word)`, `get_all()`, `entry_count()`
+- เปิด connection ไปยัง `synonyms.db` ตอน init (sqlite3, check_same_thread=False)
+- Query ด้วย SQL JOIN บน `word_mappings` โดยตรง (ไม่โหลดทั้งหมดเข้า memory)
+- Methods:
+  - `get_synonyms(word)` → JOIN หา peers ใน group เดียวกัน, คืน `None` ถ้าไม่พบ
+  - `get_canonical(word)` → คืน `None` เสมอ (ไม่จำเป็นแล้วเพราะ DB เป็น flat groups)
+  - `get_all()` → single JOIN query คืน dict ทุก word
+  - `entry_count()` → `COUNT(DISTINCT word)`
 
 #### `service.py` — SynonymService
 - `lookup(word)`:
@@ -169,14 +178,19 @@ Python list of lists: `[['คำ1', 'คำ2', 'คำ3'], ...]` แบ่งเ
 ## การรัน
 
 ```bash
-pip install flask pythainlp
+pip install flask pythainlp flask-cors
+
+# ครั้งแรก (สร้างฐานข้อมูล)
+python database_setup.py
+
+# รัน server
 python app.py
 # เปิด http://localhost:5000
 ```
 
 ถ้าแก้ `data.csv` หรือ `synonym.py` ต้องรัน:
 ```bash
-python merge.py
+python database_setup.py
 ```
 ก่อนเริ่ม server ใหม่
 

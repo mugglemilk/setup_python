@@ -156,15 +156,16 @@ story += [
     Code(
         "setup_python/<br/>"
         "├── app.py                  # Flask app factory + page routes<br/>"
-        "├── requirements.txt        # Dependencies: flask, pythainlp<br/>"
-        "├── merged.csv              # ฐานข้อมูลคำพ้อง (ใช้ที่ runtime)<br/>"
+        "├── requirements.txt        # Dependencies: flask, pythainlp, flask-cors<br/>"
+        "├── synonyms.db             # SQLite DB (สร้างจาก database_setup.py)<br/>"
         "├── data.csv                # ข้อมูลดิบ (word, pos, synonyms)<br/>"
         "├── synonym.py              # กลุ่มคำพ้องเพิ่มเติม (Python list)<br/>"
-        "├── merge.py                # Script รวม data.csv + synonym.py → merged.csv<br/>"
+        "├── database_setup.py       # Script สร้าง synonyms.db จาก data.csv + synonym.py<br/>"
+        "├── merge.py                # Script export merged.csv (reference)<br/>"
         "├── blacklist.txt           # คำที่ไม่ต้องการ<br/>"
         "├── api/<br/>"
         "│   ├── synonym/<br/>"
-        "│   │   ├── repository.py   # อ่าน merged.csv → dict lookup<br/>"
+        "│   │   ├── repository.py   # query synonyms.db → SQL lookup<br/>"
         "│   │   ├── service.py      # lookup + คำนวณ recommended<br/>"
         "│   │   └── routes.py       # GET /api/synonym, /api/dictionary<br/>"
         "│   └── poem/<br/>"
@@ -182,10 +183,15 @@ story += [
 story += [
     H1("3. ฐานข้อมูลคำพ้อง"),
     SP(10),
-    H2("3.1  merged.csv — ฐานข้อมูล runtime"),
-    P("ไฟล์หลักที่ระบบใช้งาน รูปแบบ CSV:"),
-    Code("word,pos,synonym<br/>มนุษย์,n,คน|นรชน|บุรุษ|ประชา|นร"),
-    P("<b>สำคัญ:</b> ต้องรัน <code>python merge.py</code> ใหม่ทุกครั้งที่แก้ไข data.csv หรือ synonym.py", sNote),
+    H2("3.1  synonyms.db — ฐานข้อมูล SQLite (runtime)"),
+    P("ไฟล์หลักที่ระบบใช้งาน มี 2 ตาราง:"),
+    table(
+        [["ตาราง", "คอลัมน์", "คำอธิบาย"],
+         ["synonym_groups", "group_id, source", "แต่ละแถวคือกลุ่มคำพ้อง 1 กลุ่ม"],
+         ["word_mappings", "word, group_id", "แต่ละคำ → อ้างอิง group_id"]],
+        [4*cm, 4.5*cm, 8*cm]
+    ),
+    P("<b>สำคัญ:</b> ต้องรัน <code>python database_setup.py</code> ใหม่ทุกครั้งที่แก้ไข data.csv หรือ synonym.py", sNote),
     SP(6),
 
     H2("3.2  data.csv — ข้อมูลดิบ"),
@@ -199,11 +205,12 @@ story += [
          "  ... ]"),
     SP(6),
 
-    H2("3.4  merge.py — สคริปต์รวมข้อมูล"),
+    H2("3.4  database_setup.py — สคริปต์สร้างฐานข้อมูล"),
+    P("ใช้ logic เดียวกับ merge.py แต่บันทึกลง SQLite แทน CSV:"),
     Bullet("อ่าน data.csv และ synonym.py"),
     Bullet("Match กลุ่มคำพ้องที่มีคำตรงกัน → รวม synonyms"),
     Bullet("กลุ่มที่ไม่มีใน data.csv → เพิ่มเป็น entry ใหม่"),
-    Bullet("เขียน merged.csv"),
+    Bullet("บันทึกลง synonyms.db + สร้าง INDEX + ลบคำใน blacklist.txt"),
     SP(10),
 ]
 
@@ -232,9 +239,10 @@ story += [
     SP(10),
 
     H2("4.3  SynonymRepository (repository.py)"),
-    P("โหลด merged.csv ครั้งเดียวตอน startup สร้าง 2 dict:"),
-    Bullet("<b>_word_to_syns</b>: คำหลัก → [คำพ้อง...]"),
-    Bullet("<b>_syn_to_word</b>: คำพ้อง → คำหลัก (reverse lookup)"),
+    P("เปิด connection ไปยัง synonyms.db ตอน init แล้ว query ด้วย SQL JOIN:"),
+    Bullet("<b>get_synonyms(word)</b>: JOIN word_mappings หา peers ใน group เดียวกัน"),
+    Bullet("<b>get_all()</b>: single JOIN query คืน dict ทุก word (ไม่โหลดเข้า memory)"),
+    Bullet("<b>entry_count()</b>: COUNT(DISTINCT word) จาก DB"),
     SP(6),
 
     H2("4.4  SynonymService (service.py)"),
@@ -371,23 +379,28 @@ story += [
     SP(10),
 
     H2("8.1  ติดตั้ง"),
-    Code("pip install flask pythainlp"),
+    Code("pip install flask pythainlp flask-cors"),
     SP(6),
 
-    H2("8.2  รัน server"),
+    H2("8.2  สร้างฐานข้อมูล (ครั้งแรก)"),
+    Code("python database_setup.py"),
+    SP(6),
+
+    H2("8.3  รัน server"),
     Code("python app.py<br/># เปิด http://localhost:5000"),
     SP(6),
 
-    H2("8.3  อัปเดตฐานข้อมูลคำพ้อง"),
+    H2("8.4  อัปเดตฐานข้อมูลคำพ้อง"),
     P("เมื่อแก้ไข data.csv หรือ synonym.py ต้องรัน:"),
-    Code("python merge.py"),
+    Code("python database_setup.py"),
     P("แล้ว restart server ใหม่", sNote),
     SP(10),
 
-    H2("8.4  Dependencies"),
+    H2("8.5  Dependencies"),
     table(
         [["Package", "เวอร์ชัน", "การใช้งาน"],
          ["flask", "latest", "Web framework + Blueprint routing"],
+         ["flask-cors", "latest", "CORS headers สำหรับ API"],
          ["pythainlp", "latest", "แบ่งพยางค์ภาษาไทย (syllable_tokenize)"],
          ["reportlab", "4.x", "สร้างเอกสาร PDF (ใช้ generate_pdf.py เท่านั้น)"]],
         [3.5*cm, 3*cm, 10*cm]
