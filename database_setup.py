@@ -85,6 +85,7 @@ def create_db():
         CREATE TABLE word_mappings (
             word TEXT,
             group_id INTEGER,
+            is_canonical INTEGER DEFAULT 0,
             FOREIGN KEY (group_id) REFERENCES synonym_groups(group_id),
             PRIMARY KEY (word, group_id)
         )
@@ -96,10 +97,10 @@ def create_db():
         all_words = [word] + list(syns)
         cursor.execute('INSERT INTO synonym_groups (source) VALUES (?)', (pos,))
         group_id = cursor.lastrowid
-        for w in all_words:
+        for i, w in enumerate(all_words):
             cursor.execute(
-                'INSERT OR IGNORE INTO word_mappings (word, group_id) VALUES (?, ?)',
-                (w, group_id)
+                'INSERT OR IGNORE INTO word_mappings (word, group_id, is_canonical) VALUES (?, ?, ?)',
+                (w, group_id, 1 if i == 0 else 0)
             )
 
     print("สร้าง INDEX ...")

@@ -555,6 +555,7 @@ window.fetchSynonyms = async function(word) {
 
 // ── Auto-analyze (trigger after first complete แถว, then per วรรค) ──
 let autoTimer = null;
+let lastStanzas = null;
 
 document.getElementById('poemInput').addEventListener('input', function() {
   clearTimeout(autoTimer);
@@ -681,6 +682,7 @@ async function analyze() {
       return;
     }
     const data = await res.json();
+    lastStanzas = data.stanzas;
     document.getElementById('result').innerHTML = data.stanzas.map(renderStanza).join('');
   } catch (e) {
     document.getElementById('result').innerHTML =
@@ -691,10 +693,17 @@ async function analyze() {
   }
 }
 
+document.getElementById('showDiagram').addEventListener('change', function() {
+  if (lastStanzas) {
+    document.getElementById('result').innerHTML = lastStanzas.map(renderStanza).join('');
+  }
+});
+
 function clearAll() {
   document.getElementById('poemInput').value = '';
   document.getElementById('result').innerHTML = '';
   document.getElementById('synonymSuggestions').innerHTML = '';
+  lastStanzas = null;
 }
 </script>
 </body>

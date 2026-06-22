@@ -27,13 +27,23 @@ class SynonymRepository:
         return [] if exists else None
 
     def get_canonical(self, word: str) -> str | None:
-        return None
+        cur = self._conn.execute(
+            '''SELECT wm2.word
+               FROM word_mappings wm1
+               JOIN word_mappings wm2 ON wm1.group_id = wm2.group_id
+               WHERE wm1.word = ? AND wm2.is_canonical = 1
+               LIMIT 1''',
+            (word,)
+        )
+        row = cur.fetchone()
+        return row[0] if row else None
 
     def get_all(self) -> dict[str, list[str]]:
         cur = self._conn.execute(
-            '''SELECT DISTINCT wm1.word, wm2.word
+            '''SELECT wm1.word, wm2.word
                FROM word_mappings wm1
-               JOIN word_mappings wm2 ON wm1.group_id = wm2.group_id AND wm1.word != wm2.word'''
+               JOIN word_mappings wm2 ON wm1.group_id = wm2.group_id AND wm1.word != wm2.word
+               WHERE wm1.is_canonical = 1'''
         )
         result: dict[str, list[str]] = defaultdict(list)
         for word, synonym in cur.fetchall():

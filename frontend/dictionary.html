@@ -252,6 +252,11 @@
   .syn-tag:hover  { border-color: var(--accent); color: var(--accent); }
   .syn-tag.copied { background: var(--ok); border-color: var(--ok); color: #fff; }
 
+  td.word-match {
+    color: var(--ok);
+    text-shadow: 0 0 10px rgba(74, 222, 128, 0.35);
+  }
+
   /* ── Empty / loading ── */
   .placeholder {
     padding: 48px;
@@ -350,29 +355,46 @@ function render(entries) {
     return;
   }
   tbody.innerHTML = entries.map(e => {
+    const wordClass = e.matched ? ' word-match' : '';
     const tags = e.synonyms.map(s =>
       `<span class="syn-tag" onclick="copyTag(this,'${s.replace(/'/g,"&#39;")}')">${s}</span>`
     ).join('');
-    return `<tr><td>${e.word}</td><td><div class="syn-tags">${tags}</div></td></tr>`;
+    return `<tr><td class="${wordClass}">${e.word}</td><td><div class="syn-tags">${tags}</div></td></tr>`;
   }).join('');
 }
 
 function applyFilter() {
-  const q    = document.getElementById('filter').value.trim().toLowerCase();
+  const q    = document.getElementById('filter').value.trim();
+  const qLow = q.toLowerCase();
   const dir  = document.getElementById('sortSelect').value;
-  let entries = q ? allEntries.filter(e =>
-    e.word.toLowerCase().includes(q) ||
-    e.synonyms.some(s => s.toLowerCase().includes(q))
-  ) : [...allEntries];
+
+  let entries;
+  if (!q) {
+    entries = allEntries.map(e => ({ word: e.word, synonyms: e.synonyms, matched: false }));
+  } else {
+    entries = [];
+    for (const e of allEntries) {
+      if (e.word.toLowerCase().includes(qLow)) {
+        entries.push({ word: e.word, synonyms: e.synonyms, matched: true });
+      } else {
+        const synMatch = e.synonyms.find(s => s.toLowerCase().includes(qLow));
+        if (synMatch) {
+          const rest = [e.word, ...e.synonyms.filter(s => s !== synMatch)];
+          entries.push({ word: synMatch, synonyms: rest, matched: true });
+        }
+      }
+    }
+  }
+
   entries.sort((a, b) => {
     if (q) {
-    const aExact = a.word.toLowerCase() === q;
-    const bExact = b.word.toLowerCase() === q;
-    const aStart = a.word.toLowerCase().startsWith(q);
-    const bStart = b.word.toLowerCase().startsWith(q);
-    if (aExact !== bExact) return aExact ? -1 : 1;
-    if (aStart !== bStart) return aStart ? -1 : 1;
-  }
+      const aExact = a.word.toLowerCase() === qLow;
+      const bExact = b.word.toLowerCase() === qLow;
+      const aStart = a.word.toLowerCase().startsWith(qLow);
+      const bStart = b.word.toLowerCase().startsWith(qLow);
+      if (aExact !== bExact) return aExact ? -1 : 1;
+      if (aStart !== bStart) return aStart ? -1 : 1;
+    }
     const cmp = a.word.localeCompare(b.word, 'th');
     return dir === 'asc' ? cmp : -cmp;
   });
