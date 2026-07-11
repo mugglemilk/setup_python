@@ -14,8 +14,8 @@ def create_app():
     repo = SynonymRepository()
     app.config['SYNONYM_SERVICE'] = SynonymService(repo)
 
-    app.register_blueprint(synonym_bp, url_prefix='/api')
-    app.register_blueprint(poem_bp, url_prefix='/api')
+    app.register_blueprint(synonym_bp, url_prefix='/api') #flask
+    app.register_blueprint(poem_bp, url_prefix='/api') #flask
 
     @app.route('/')
     def home():
@@ -34,4 +34,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

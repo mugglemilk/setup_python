@@ -10,8 +10,8 @@ def get_synonym():
         return jsonify({"error": "query parameter 'word' is required"}), 400
 
     service = current_app.config['SYNONYM_SERVICE']
-    result = service.lookup(word)
-    return jsonify(result)
+    result = service.lookup(word) 
+    return jsonify(result) 
 
 
 @bp.route('/dictionary')

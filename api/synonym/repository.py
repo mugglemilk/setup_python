@@ -10,12 +10,19 @@ class SynonymRepository:
         self._db_path = os.path.abspath(db_path)
         self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
 
-    def get_synonyms(self, word: str) -> list[str] | None:
+    def get_synonyms(self, word: str) -> list[str] | None: ##get_synonyms ส่งคำพ้อง (จุดดึงข้อมูลดิบจาก database)
+
         cur = self._conn.execute(
-            '''SELECT DISTINCT wm2.word
+            '''SELECT DISTINCT wm2.word 
                FROM word_mappings wm1
-               JOIN word_mappings wm2 ON wm1.group_id = wm2.group_id
-               WHERE wm1.word = ? AND wm2.word != ?''',
+               JOIN word_mappings wm2 ON wm1.group_id = wm2.group_id 
+               WHERE wm1.word = ? AND wm2.word != ?''', 
+               ##wm2.word ดึงคำมาโชว์
+               ##word_mappings wm1 คำที่พิมพ์มาอยู่กลุ่มไหน
+               ##word_mappings wm2 คำอื่น ๆ ที่อยู่ในกลุ่มเดียวกันกับ wm1 มีคำว่าอะไรบ้าง
+               ##JOIN เชื่อมเป็นกลุ่มเดียวกัน
+               ##WHERE เอาคำที่พิมพ์มาเป็นตัวตั้งต้น ##word ที่ส่งมาอยู่ใน group_id ไหน  
+               ##AND ไม่เอาคำตั้งต้นมาเป็นคำไวพจน์
             (word, word)
         )
         rows = cur.fetchall()

@@ -1,642 +1,280 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th" data-theme="dark">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แต่งกลอนแปด</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-<style>
-  /* ── Design tokens ── */
-  :root {
-    --bg:         #16293a;
-    --surface:    #1f3a50;
-    --surface2:   #122030;
-    --border:     rgba(255,255,255,0.08);
-    --text:       #cfe0ec;
-    --muted:      #5c7e95;
-    --accent:     #c4956a;
-    --accent-h:   #d4a87c;
-    --ok:         #4ade80;
-    --warn:       #facc15;
-    --err:        #f87171;
-    --shadow:     0 4px 28px rgba(0,0,0,0.5);
-    --radius:     14px;
-    --trans:      0.22s ease;
-  }
-  [data-theme="light"] {
-    --bg:         #afc6d4;
-    --surface:    #ffffff;
-    --surface2:   #dceaf2;
-    --border:     rgba(0,0,0,0.07);
-    --text:       #1a3040;
-    --muted:      #5e8aa4;
-    --accent:     #b8854c;
-    --accent-h:   #cc9a5e;
-    --ok:         #16a34a;
-    --warn:       #b45309;
-    --err:        #dc2626;
-    --shadow:     0 4px 20px rgba(0,0,0,0.12);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Kanit', 'Sarabun', sans-serif;
-    font-weight: 300;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    transition: background var(--trans), color var(--trans);
-  }
-
-  /* ── Navbar ── */
-  .navbar {
-    display: flex;
-    align-items: center;
-    padding: 0 28px;
-    height: 56px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    gap: 8px;
-    transition: background var(--trans);
-  }
-  .nav-brand {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: var(--accent);
-    text-decoration: none;
-    letter-spacing: 0.5px;
-    margin-right: 16px;
-    white-space: nowrap;
-  }
-  .nav-links { display: flex; gap: 2px; flex: 1; }
-  .nav-link {
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.87rem;
-    font-family: inherit;
-    font-weight: 400;
-    color: var(--muted);
-    text-decoration: none;
-    transition: all var(--trans);
-    white-space: nowrap;
-  }
-  .nav-link:hover  { color: var(--text); background: var(--surface2); }
-  .nav-link.active { color: var(--accent); background: var(--surface2); font-weight: 600; }
-
-  /* ── Header ── */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
-  }
-  h1 {
-    font-size: 1.85rem;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: 1.5px;
-    text-align: center;
-  }
-  .theme-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 50px;
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-family: inherit;
-    color: var(--muted);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: all var(--trans);
-    white-space: nowrap;
-  }
-  .theme-btn:hover { color: var(--text); border-color: var(--accent); }
-
-  .subtitle {
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.88rem;
-    margin-bottom: 28px;
-    font-weight: 300;
-  }
-
-  /* .container { max-width: 920px; margin: 0 auto; padding: 28px 24px 72px; } */
-    .container { 
-      max-width: 1200px; 
-      margin: 0 auto; 
-      padding: 28px 24px 72px; 
-      display: flex; 
-      gap: 20px; 
-      align-items: flex-start; 
-    }
-    .main-col { 
-      flex: 1; 
-      min-width: 0; 
-    }
-    .side-col { 
-      width: 280px; 
-      flex-shrink: 0; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 14px;
-      padding-top: 104px;
-      align-self: stretch;
-    }
-  
-  /* ── Input card ── */
-  .input-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
-    box-shadow: var(--shadow);
-    margin-bottom: 14px;
-    transition: background var(--trans);
-  }
-  .side-col .input-card {
-  flex: 1;
-  margin-bottom: 0;
-}
-  textarea {
-    width: 100%;
-    height: 155px;
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 14px 16px;
-    font-size: 1.08rem;
-    font-family: inherit;
-    font-weight: 300;
-    resize: vertical;
-    line-height: 2.1;
-    outline: none;
-    transition: border-color var(--trans), background var(--trans);
-  }
-  textarea:focus { border-color: var(--accent); }
-  textarea::placeholder { color: var(--muted); opacity: 0.6; }
-
-  /* ── Controls ── */
-  .controls {
-    display: flex;
-    gap: 10px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .btn-primary {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 30px;
-    font-size: 0.98rem;
-    font-family: inherit;
-    font-weight: 600;
-    cursor: pointer;
-    letter-spacing: 0.5px;
-    transition: background var(--trans), transform 0.1s;
-  }
-  .btn-primary:hover  { background: var(--accent-h); }
-  .btn-primary:active { transform: scale(0.97); }
-  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 20px;
-    font-size: 0.92rem;
-    font-family: inherit;
-    cursor: pointer;
-    transition: all var(--trans);
-  }
-  .btn-ghost:hover { color: var(--text); border-color: var(--muted); }
-  .check-label {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    color: var(--muted);
-    font-size: 0.86rem;
-    cursor: pointer;
-    margin-left: auto;
-    user-select: none;
-    transition: color var(--trans);
-  }
-  .check-label:hover { color: var(--text); }
-  .check-label input[type="checkbox"] { accent-color: var(--accent); width: 14px; height: 14px; }
-
-  /* ── Legend ── */
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-    padding: 12px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 0.81rem;
-    color: var(--muted);
-    margin-bottom: 24px;
-    align-items: center;
-    transition: background var(--trans);
-  }
-  .legend-label { font-weight: 600; color: var(--accent); margin-right: 2px; }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: var(--surface2);
-    border-radius: 20px;
-    padding: 3px 10px;
-    transition: background var(--trans);
-  }
-  .swatch { 
-    display: inline-block; 
-    width: 9px; 
-    height: 9px; 
-    border-radius: 50%; 
-    flex-shrink: 0; 
-  }
-  /* อันนี้จะทำไฮไลท์ให้มันแสดงคำไวพจน์ในระบบ จุด 2 */
-  .syn-tag {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2px 10px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.15s;
-  user-select: none;
-}
-.syn-tag:hover { 
-  border-color: var(--accent); 
-  color: var(--accent); 
-} /*ถึงตรงนี้ของจุดที่ 2*/
-.syn-recommended { /*เริ่ม 5*/
-  background: rgba(74,222,128,0.15); 
-  border-color: #4ade80; 
-  color: #4ade80; 
-} /*อันนี้ทำ tag สีเขียวคำไวพจนืที่แนะนำ 5*/
-  /* ── Result ── */
-  .stanza {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 30px;
-    margin-bottom: 18px;
-    box-shadow: var(--shadow);
-    transition: background var(--trans);
-  }
-  .stanza-num {
-    font-size: 0.72rem;
-    font-weight: 400;
-    color: var(--muted);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-  }
-  .line-row {
-    display: flex;
-    margin-bottom: 2px;
-    align-items: baseline;
-    flex-wrap: wrap;
-  }
-  .half {
-    flex: 1;
-    min-width: 240px;
-    line-height: 2.7;
-    font-size: 1.18rem;
-    font-weight: 300;
-    padding: 0 8px;
-  }
-  .half-divider {
-    padding: 0 10px;
-    font-size: 1.1rem;
-    line-height: 2.7;
-    color: var(--border);
-    opacity: 0.6;
-  }
-
-  /* ── Rhyme highlights (dark default) ── */
-  .r-sut    { background: rgba(91,156,246,0.14); border-bottom: 2px solid #5b9cf6; border-radius: 3px; padding: 0 2px; }
-  .r-nai    { background: rgba(91,156,246,0.14); border-bottom: 2px solid #5b9cf6; border-radius: 3px; padding: 0 2px; }
-  .r-son    { background: rgba(78,203,141,0.14);  border-bottom: 2px solid #4ecb8d; border-radius: 3px; padding: 0 2px; }
-  .r-ton    { background: rgba(91,156,246,0.14);  border-bottom: 2px solid #5b9cf6; border-radius: 3px; padding: 0 2px; }
-  .r-bad    { background: rgba(255,107,122,0.14);   border-bottom: 2px dashed #ff6b7a; border-radius: 3px; padding: 0 2px; }
-  .word-err { background: rgba(255,68,68,0.11);   border-bottom: 2px dashed #ff4444; border-radius: 3px; padding: 0 2px; }
-
-  /* ── Rhyme highlights (light) ── */
-  [data-theme="light"] .r-sut    { background: rgba(29,78,216,0.09); border-bottom-color: #1d4ed8; }
-  [data-theme="light"] .r-nai    { background: rgba(29,78,216,0.09);  border-bottom-color: #1d4ed8; }
-  [data-theme="light"] .r-son    { background: rgba(22,101,52,0.09);  border-bottom-color: #166534; }
-  [data-theme="light"] .r-ton    { background: rgba(29,78,216,0.09);  border-bottom-color: #1d4ed8; }
-  [data-theme="light"] .r-bad    { background: rgba(201,39,52,0.09);  border-bottom-color: #c92734; }
-  [data-theme="light"] .word-err { background: rgba(185,28,28,0.09);  border-bottom-color: #b91c1c; }
-
-  /* ── Rhyme report ── */
-  .rhyme-report {
-    margin-top: 20px;
-    padding: 12px 16px;
-    background: var(--surface2);
-    border-radius: 9px;
-    font-size: 0.87rem;
-    line-height: 2;
-    border-left: 3px solid var(--border);
-    transition: background var(--trans);
-  }
-  .rhyme-report.has-issues { border-left-color: var(--err); }
-  .rhyme-report.all-ok     { border-left-color: var(--ok); }
-  .rhyme-report h3 {
-    color: var(--accent);
-    margin-bottom: 4px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
-  .ok-msg   { color: var(--ok); }
-  .warn-msg { color: var(--warn); }
-  .err-msg  { color: var(--err); }
-
-  /* ── Diagram ── */
-  .diagram {
-    margin-top: 14px;
-    padding: 14px 16px;
-    background: var(--surface2);
-    border-radius: 9px;
-    font-size: 0.83rem;
-    border: 1px solid var(--border);
-    transition: background var(--trans);
-  }
-  .diagram h3 {
-    color: var(--accent);
-    margin-bottom: 10px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
-  .diagram table { width: 100%; border-collapse: collapse; }
-  .diagram td { padding: 7px 10px; border-bottom: 1px solid var(--border); color: var(--text); }
-  .diagram tr:last-child td { border-bottom: none; }
-  .diagram td:first-child { color: var(--muted); width: 88px; font-size: 0.78rem; white-space: nowrap; }
-
-  /* ── Tooltip ── */
-  [data-tip] { position: relative; cursor: help; }
-  [data-tip]::after {
-    content: attr(data-tip);
-    position: absolute;
-    bottom: calc(100% + 8px);
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 8px 14px;
-    border-radius: 9px;
-    font-size: 0.78rem;
-    line-height: 1.7;
-    white-space: normal;
-    max-width: 480px;
-    min-width: 200px;
-    text-align: center;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 200;
-    box-shadow: var(--shadow);
-  }
-  [data-tip]:hover::after { opacity: 1; }
-</style>
-</head>
-<body>
-
-<nav class="navbar">
-  <a class="nav-brand" href="/">พ้องความหมาย</a>
-  <div class="nav-links">
-    <a href="/" class="nav-link">ค้นหาคำพ้อง</a>
-    <a href="/dictionary" class="nav-link">ตารางแสดงคำศัพท์</a>
-    <a href="/poem" class="nav-link active">แต่งกลอนแปด</a>
-  </div>
-  <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
-    <span id="themeIcon">☀</span><span id="themeLabel">โหมดสว่าง</span>
-  </button>
-</nav>
-
-<div class="container">
-<div class="main-col">
-
-  <div class="header">
-    <h1>แต่งกลอนแปด</h1>
-  </div>
-  <p class="subtitle">วางบทกลอนแล้วกด "วิเคราะห์" — ระบบจะตรวจฉันทลักษณ์และไฮไลท์คำสัมผัส</p>
-
-  <div class="input-card">
-    <textarea id="poemInput" placeholder="วางบทกลอนที่นี่ เช่น&#10;โอ้ว่าน่าเสียดายหลายประการ   เพราะเหตุการณ์ร้ายกาจอาจผ่านพ้น&#10;ใจหนึ่งรักอีกใจหนึ่งหมดจน   ความฝันปลิวลมพ้นจากอกเรา"></textarea>
-    <div class="controls">
-      <button class="btn-primary" id="analyzeBtn" onclick="analyze()">วิเคราะห์</button>
-      <button class="btn-ghost" onclick="clearAll()">ล้าง</button>
-      <label class="check-label">
-        <input type="checkbox" id="showDiagram" checked> แสดงแผนผัง
-      </label>
-    </div>
-  </div>
-
-  <div class="legend">
-    <!-- <span class="legend-label">สัมผัส</span>
-    <div class="legend-item"><span class="swatch" style="background:#b87dff"></span> สัมผัสนอก</div>
-    <div class="legend-item"><span class="swatch" style="background:#ffcc00"></span> สัมผัสนอก</div>  -->
-   <div class="legend-item"><span class="swatch" style="background:#5b9cf6"></span> สัมผัสนอก</div>
-    <div class="legend-item"><span class="swatch" style="background:#4ecb8d"></span> สัมผัสระหว่างบท</div>
-
-    <div class="legend-item"><span class="swatch" style="background:#ff6b7a"></span> สัมผัสไม่ตรง</div>
-  </div>
-
- <div id="result"></div>
-
-</div> <!-- end main-col -->
-
-<div class="side-col">
-  <div class="input-card">
-    <!-- <div style="font-size:0.8rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px">คำไวพจน์ที่แนะนำ</div> -->
-    <div style="font-size:0.8rem;
-                font-weight:600;
-                color:var(--accent);
-                text-transform:uppercase;
-                letter-spacing:0.8px;
-                margin:-20px -20px 12px -20px;
-                padding:12px 20px;
-                background:var(--surface2);
-                border-radius:var(--radius) var(--radius) 0 0;
-                border-bottom:1px solid var(--border)">คำไวพจน์ที่แนะนำ
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>แต่งกลอนแปด</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../static/synonym.css" />
+    <link rel="stylesheet" href="master.html">
+  </head>
+  <body>
+    <nav class="navbar">
+      <a class="nav-brand" href="/">พ้องความหมาย</a>
+      <div class="nav-links">
+        <a href="/" class="nav-link">ค้นหาคำพ้อง</a>
+        <a href="/dictionary" class="nav-link">ตารางแสดงคำศัพท์</a>
+        <a href="/poem" class="nav-link active">แต่งกลอนแปด</a>
       </div>
-    <div id="synonymSuggestions" style="display:flex;flex-wrap:wrap;gap:6px;">
-      <!-- จะ populate ทีหลัง -->
+      <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">
+        <!--ปุ่มโหมดดดดดดดดดดดจ้าาาาาาาา-->
+        <span id="themeIcon">☀</span><span id="themeLabel">โหมดสว่าง</span>
+      </button>
+    </nav>
+    <div class="container">
+      <div class="main-col">
+        <div class="header">
+          <h1>แต่งกลอนแปด</h1>
+        </div>
+        <p class="subtitle">
+          วางบทกลอนแล้วกด "วิเคราะห์" — ระบบจะตรวจฉันทลักษณ์และไฮไลท์คำสัมผัส
+        </p>
+
+        <div class="input-card">
+          <textarea
+            id="poemInput"
+            placeholder="วางบทกลอนที่นี่ เช่น&#10;โอ้ว่าน่าเสียดายหลายประการ   เพราะเหตุการณ์ร้ายกาจอาจผ่านพ้น&#10;ใจหนึ่งรักอีกใจหนึ่งหมดจน   ความฝันปลิวลมพ้นจากอกเรา"
+          ></textarea>
+          <div class="controls">
+            <!-- <button class="btn-primary" id="analyzeBtn" onclick="analyze()">วิเคราะห์</button> วิเคราะห์จ้าาาาาา-->
+            <button class="btn-ghost" onclick="clearAll()">ล้าง</button>
+            <label class="check-label">
+              <input type="checkbox" id="showDiagram" checked /> แสดงแผนผัง
+            </label>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item">
+            <span class="swatch" style="background: #5b9cf6"></span> สัมผัสนอก
+          </div>
+          <div class="legend-item">
+            <span class="swatch" style="background: #4ecb8d"></span>
+            สัมผัสระหว่างบท
+          </div>
+          <div class="legend-item">
+            <span class="swatch" style="background: #ff6b7a"></span>
+            สัมผัสไม่ตรง
+          </div>
+        </div>
+        <div id="result"></div>
+      </div>
+      <!-- end main-col -->
+      <div class="side-col">
+        <!--tag คำพ้อง-->
+        <div class="input-card">
+          <div
+            style="
+              font-size: 0.8rem;
+              font-weight: 600;
+              color: var(--accent);
+              text-transform: uppercase;
+              letter-spacing: 0.8px;
+              margin: -20px -20px 12px -20px;
+              padding: 12px 20px;
+              background: var(--surface2);
+              border-radius: var(--radius) var(--radius) 0 0;
+              border-bottom: 1px solid var(--border);
+            "
+          >
+            คำไวพจน์ที่แนะนำ
+          </div>
+          <div
+            id="synonymSuggestions"
+            style="display: flex; flex-wrap: wrap; gap: 6px"
+          >
+            <!-- จะ populate ทีหลัง -->
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-</div>
+    <script>
+      // ── Theme toggle ──
+      function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+        const dark = theme === "dark";
+        document.getElementById("themeIcon").textContent = dark ? "☀" : "🌙";
+        document.getElementById("themeLabel").textContent = dark
+          ? "โหมดสว่าง"
+          : "โหมดมืด";
+        localStorage.setItem("thai-theme", theme);
+      }
 
-<script>
-// ── Theme toggle ──
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  const dark = theme === 'dark';
-  document.getElementById('themeIcon').textContent  = dark ? '☀' : '🌙';
-  document.getElementById('themeLabel').textContent = dark ? 'โหมดสว่าง' : 'โหมดมืด';
-  localStorage.setItem('thai-theme', theme);
-}
+      function toggleTheme() {
+        applyTheme(
+          document.documentElement.getAttribute("data-theme") === "dark"
+            ? "light"
+            : "dark",
+        );
+      }
+      applyTheme(localStorage.getItem("thai-theme") || "dark");
+      ////อันนี้จะทำไฮไลท์ให้มันแสดงคำไวพจน์ในระบบ จุด 1
+      // ── Synonym lookup ──
+      document
+        .getElementById("poemInput")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Tab") {
+            e.preventDefault();
+            document.execCommand("insertText", false, "\t");
+          }
+        });
 
-function toggleTheme() {
-  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-}
-applyTheme(localStorage.getItem('thai-theme') || 'dark');
-////อันนี้จะทำไฮไลท์ให้มันแสดงคำไวพจน์ในระบบ จุด 1
-// ── Synonym lookup ──
-document.getElementById('poemInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    document.execCommand('insertText', false, '\t');
-  }
-});
+      let _savedSel = { start: 0, end: 0 };
 
-let _savedSel = { start: 0, end: 0 };
+      document
+        .getElementById("poemInput")
+        .addEventListener("mouseup", function () {
+          //บันทึกตำแหน่งคำตอบกดคลุมไฮไลท์คำ
+          const selected = window.getSelection().toString().trim();
+          if (selected) {
+            _savedSel = { start: this.selectionStart, end: this.selectionEnd };
+            window.fetchSynonyms(selected); //บรรทัดนี้จะยิง HTTP GET ไปที่ /api/synonym?word=<คำที่เลือก>/route.py
+          }
+        });
 
-document.getElementById('poemInput').addEventListener('mouseup', function() {
-  const selected = window.getSelection().toString().trim();
-  if (selected) {
-    _savedSel = { start: this.selectionStart, end: this.selectionEnd };
-    window.fetchSynonyms(selected);
-  }
-});
+      function replaceSelection(word) {
+        //แทนที่คำหลังกด tag
+        const ta = document.getElementById("poemInput");
+        ta.focus();
+        ta.setSelectionRange(_savedSel.start, _savedSel.end);
+        document.execCommand("insertText", false, word);
+      }
 
-function replaceSelection(word) {
-  const ta = document.getElementById('poemInput');
-  ta.focus();
-  ta.setSelectionRange(_savedSel.start, _savedSel.end);
-  document.execCommand('insertText', false, word);
-}
+      window.fetchSynonyms = async function (word) {
+        const box = document.getElementById("synonymSuggestions");
+        box.innerHTML = `<span style="color:var(--muted);font-size:0.85rem">กำลังโหลด…</span>`;
+        try {
+          const res = await fetch(
+            `/api/synonym?word=${encodeURIComponent(word)}`,
+          ); //ตรงนี้แหละที่ยิง fetch ไปหลังบ้าน api/synonym/route.py
+          const data = await res.json(); //หลังบ้านประมวลผลเสร็จก็จะส่งมาตรงนี้ รับค่ามาเก็บในตัวแปร data
+          if (!data.synonyms || !data.synonyms.length) {
+            box.innerHTML = `<span style="color:var(--muted);font-size:0.85rem">ไม่พบคำไวพจน์</span>`;
+            return;
+          }
+          const recommended = new Set(data.recommended || []); //แยกคำแนะนำกับปกติไวพจน์
+          const sorted = [...data.synonyms].sort((a, b) =>
+            a.localeCompare(b, "th"),
+          );
+          const recList = sorted.filter((s) => recommended.has(s));
+          const restList = sorted.filter((s) => !recommended.has(s));
+          box.innerHTML = [...recList, ...restList] 
+          //.slice(0,5) //คือให้แสดงผลลัพธ์ 5 คำ
+            .map(
+              (
+                s, //อันนี้แยกเป็น 2 filter สีคำแนะนำ
+              ) =>
+                `<span class="syn-tag${recommended.has(s) ? " syn-recommended" : ""}" onclick="replaceSelection('${s.replace(/'/g, "&#39;")}')">${s}</span>`,
+            )
+            .join(""); // เอาไว้บนสุดจบ 7
+        } catch (e) {
+          box.innerHTML = `<span style="color:var(--err);font-size:0.85rem">โหลดไม่ได้</span>`;
+        }
+      }; //ถึงตรงนี้ของจุดที่ 1
 
-window.fetchSynonyms = async function(word) {
-  const box = document.getElementById('synonymSuggestions');
-  box.innerHTML = `<span style="color:var(--muted);font-size:0.85rem">กำลังโหลด…</span>`;
-  try {
-    const res = await fetch(`/api/synonym?word=${encodeURIComponent(word)}`);
-    const data = await res.json();
-    if (!data.synonyms || !data.synonyms.length) {
-      box.innerHTML = `<span style="color:var(--muted);font-size:0.85rem">ไม่พบคำไวพจน์</span>`;
-      return;
-    }
-      const recommended = new Set(data.recommended || []); //อันนี้เอามาทำ tag แนะนำคำไวพจน์สีเขียวจุดที่ 7 (เอาไว้บนสุด)
-      const sorted = [...data.synonyms].sort((a, b) => a.localeCompare(b, 'th'));
-      const recList = sorted.filter(s => recommended.has(s));
-      const restList = sorted.filter(s => !recommended.has(s));
-      box.innerHTML = [...recList, ...restList].map(s =>
-        `<span class="syn-tag${recommended.has(s) ? ' syn-recommended' : ''}" onclick="replaceSelection('${s.replace(/'/g,"&#39;")}')">${s}</span>`
-      ).join(''); // เอาไว้บนสุดจุบ 7
-      
-  //   const recommended = new Set(data.recommended || []);
-  //   box.innerHTML = [...data.synonyms].sort((a, b) => a.localeCompare(b, 'th')).map(s =>
-  //       `<span class="syn-tag${recommended.has(s) ? ' syn-recommended' : ''}" onclick="navigator.clipboard.writeText('${s.replace(/'/g,"&#39;")}')">${s}</span>`
-  // ).join('');
-  } catch(e) {
-    box.innerHTML = `<span style="color:var(--err);font-size:0.85rem">โหลดไม่ได้</span>`;
-  }
-} //ถึงตรงนี้ของจุดที่ 1
+      // ── Auto-analyze (trigger after first complete แถว, then per วรรค) ──
+      let autoTimer = null; //real-time checking
+      let lastStanzas = null;
 
-// ── Auto-analyze (trigger after first complete แถว, then per วรรค) ──
-let autoTimer = null;
-let lastStanzas = null;
+      document
+        .getElementById("poemInput")
+        .addEventListener("input", function () {
+          clearTimeout(autoTimer);
+          const text = this.value;
+          const trimmed = text.trim();
 
-document.getElementById('poemInput').addEventListener('input', function() {
-  clearTimeout(autoTimer);
-  const text = this.value;
-  const trimmed = text.trim();
+          if (!trimmed) {
+            document.getElementById("result").innerHTML = "";
+            return;
+          }
 
-  if (!trimmed) {
-    document.getElementById('result').innerHTML = '';
-    return;
-  }
+          const lines = text.split("\n");
+          const firstLine = lines[0];
+          // ตรวจว่าเริ่มพิมพ์วรรคที่ 2 แล้ว (มีตัวอักษรหลัง separator: tab หรือ 2+ spaces)
+          const waks = firstLine.split(/\t|\s{2,}/);
+          const startedWak2 = waks.length >= 2 && waks[1].trim().length > 0;
 
-  const lines = text.split('\n');
-  const firstLine = lines[0];
+          // หรือมีบรรทัดที่ 2 แล้ว (กรณีพิมพ์ต่อ)
+          const hasSecondLine =
+            lines.length >= 2 && firstLine.trim().length > 0;
 
-  // ตรวจว่าเริ่มพิมพ์วรรคที่ 2 แล้ว (มีตัวอักษรหลัง separator: tab หรือ 2+ spaces)
-  const waks = firstLine.split(/\t|\s{2,}/);
-  const startedWak2 = waks.length >= 2 && waks[1].trim().length > 0;
-
-  // หรือมีบรรทัดที่ 2 แล้ว (กรณีพิมพ์ต่อ)
-  const hasSecondLine = lines.length >= 2 && firstLine.trim().length > 0;
-
-  if (startedWak2 || hasSecondLine) {
-    autoTimer = setTimeout(analyze, 100);
-  }
-});
-
-// ── Render helpers ──
- function renderWord(w) {
-   if (!w.word) return '';
-   const cls = w.cls ? ` class="${w.cls}"` : '';
-   const tip = w.tip ? ` data-tip="${w.tip.replace(/"/g, '&quot;')}"` : '';
-   return `<span${cls}${tip}>${w.word}</span>`;
- }
-
-function renderHalf(annotated) {
-  return annotated.map(renderWord).join(' ');
-}
-
-function statusIcon(ok) {
-  return ok
-    ? `<span style="color:var(--ok)">✓</span>`
-    : `<span style="color:var(--err)">✗</span>`;
-}
-
-function renderStanza(st) {
-  const pairs = [[0, 1], [2, 3]];
-  let html = `<div class="stanza"><div class="stanza-num">บทที่ ${st.index + 1}</div>`;
-
-  pairs.forEach(([li, ri]) => {
-    html += `<div class="line-row">
-      <span class="half">${renderHalf(st.annotations[li])}</span>
+          if (startedWak2 || hasSecondLine) {
+            autoTimer = setTimeout(analyze, 100);
+          }
+        });
+      // ── Render helpers ──
+      function renderWord(w) {
+        if (!w.word) return "";
+        const cls = w.cls ? ` class="${w.cls}"` : "";
+        const tip = w.tip ? ` data-tip="${w.tip.replace(/"/g, "&quot;")}"` : "";
+        return `<span${cls}${tip}>${w.word}</span>`;
+      }
+      function renderHalf(annotated) {
+        return annotated.map(renderWord).join(" ");
+      }
+      function statusIcon(ok) {
+        return ok
+          ? `<span style="color:var(--ok)">✓</span>`
+          : `<span style="color:var(--err)">✗</span>`;
+      }
+      function renderStanza(st, nextSt) {
+        const pairs = [
+          [0, 1],
+          [2, 3],
+        ];
+        let html = `<div class="stanza"><div class="stanza-num">บทที่ ${st.index + 1}</div>`;
+        pairs.forEach(([li, ri]) => {
+          //annotations เป็นคำที่ไม่สัมผัสกันขีดเส้นใต้สีแดง
+          html += `<div class="line-row">
+      <span class="half">${renderHalf(st.annotations[li])}</span> 
       <span class="half-divider">┃</span>
       <span class="half">${renderHalf(st.annotations[ri])}</span>
     </div>`;
-  });
-
-  const hasIssues = st.issues.length > 0;
-  html += `<div class="rhyme-report ${hasIssues ? 'has-issues' : 'all-ok'}">`;
-  if (hasIssues) {
-    html += `<h3>ข้อสังเกต</h3>`;
-    st.issues.forEach(iss => {
-      const cls  = iss.type === 'err' ? 'err-msg' : 'warn-msg';
-      const icon = iss.type === 'err' ? '✗' : '⚠';
-      html += `<div class="${cls}">${icon} ${iss.message}</div>`;
-    });
-  } else {
-    html += `<div class="ok-msg">✓ ฉันทลักษณ์ถูกต้อง</div>`;
-  }
-  html += `</div>`;
-
-  if (document.getElementById('showDiagram').checked) {
-    const [A, B, C, D] = st.last_syls.map(w => w || '—');
-    const { nok_ok: nokOk, ir1, ir3 } = st;
-    const ir1Word = ir1.ok ? (st.halves[1].syllables[ir1.recv_idx] || '?') : '?';
-    const ir3Word = ir3.ok ? (st.halves[3].syllables[ir3.recv_idx] || '?') : '?';
-
-    html += `<div class="diagram"><h3>แผนผังสัมผัส</h3>
+        });
+        const hasIssues = st.issues.length > 0;
+        html += `<div class="rhyme-report ${hasIssues ? "has-issues" : "all-ok"}">`;
+        if (hasIssues) {
+          html += `<h3>ข้อสังเกต</h3>`;
+          st.issues.forEach((iss) => {
+            const cls = iss.type === "err" ? "err-msg" : "warn-msg";
+            const icon = iss.type === "err" ? "✗" : "⚠";
+            html += `<div class="${cls}">${icon} ${iss.message}</div>`;
+          });
+        } else {
+          html += `<div class="ok-msg">✓ ฉันทลักษณ์ถูกต้อง</div>`;
+        }
+        html += `</div>`;
+        if (document.getElementById("showDiagram").checked) {
+          const [A, B, C, D] = st.last_syls.map((w) => w || "—");
+          const { nok_ok: nokOk, ir1, ir3 } = st;
+          const ir1Word = ir1.ok
+            ? st.halves[1].syllables[ir1.recv_idx] || "?"
+            : "?";
+          const ir3Word = ir3.ok
+            ? st.halves[3].syllables[ir3.recv_idx] || "?"
+            : "?";
+          // ── คำสัมผัสระหว่างบท: คำแรกของวรรครับ บทถัดไป ──
+          // const nextH2Word = nextSt
+          //   ? nextSt.halves[1].syllables[0] || "?"
+          //   : null;
+          const nextH2Syls = nextSt ? nextSt.halves[1].syllables : null;
+          const nextH2Word =
+            nextH2Syls && nextH2Syls.length
+              ? nextH2Syls[nextH2Syls.length - 1]
+              : null;
+          const carryCellHtml = nextSt
+            ? `<span class="r-carry-recv">${D}</span> → <span class="r-carry-recv">${nextH2Word}</span> (ท้ายวรรครับบทถัดไป) ${statusIcon(nextSt.carry_ok)}`
+            : `<span class="r-son">${D}</span> <span style="color:var(--muted);font-size:0.8rem">(บทสุดท้าย — ไม่มีบทถัดไป)</span>`;
+          html += `<div class="diagram"><h3>แผนผังสัมผัส</h3>
       <table>
         <tr>
           <td>สัมผัสนอก</td>
-          <td><span class="r-sut">${A}</span> → <span class="r-ton">${ir1Word}</span> (คำที่ ${ir1.ok ? ir1.recv_idx + 1 : '?'} วรรครับ) ${statusIcon(ir1.ok)}</td>
+          <td><span class="r-sut">${A}</span> → <span class="r-ton">${ir1Word}</span> (คำที่ ${ir1.ok ? ir1.recv_idx + 1 : "?"} วรรครับ) ${statusIcon(ir1.ok)}</td>
         </tr>
         <tr>
           <td>สัมผัสนอก</td>
@@ -644,67 +282,80 @@ function renderStanza(st) {
         </tr>
         <tr>
           <td>สัมผัสนอก</td>
-          <td><span class="r-nai">${C}</span> → <span class="r-ton">${ir3Word}</span> (คำที่ ${ir3.ok ? ir3.recv_idx + 1 : '?'} วรรคส่ง) ${statusIcon(ir3.ok)}</td>
+          <td><span class="r-nai">${C}</span> → <span class="r-ton">${ir3Word}</span> (คำที่ ${ir3.ok ? ir3.recv_idx + 1 : "?"} วรรคส่ง) ${statusIcon(ir3.ok)}</td>
         </tr>
         <tr>
           <td>ระหว่างบท</td>
-          <td><span class="r-son">${D}</span> → วรรครับบทถัดไป ${
-            st.carry_ok === false ? statusIcon(false)
-            : st.carry_ok === true ? statusIcon(true)
-            : `<span style="color:var(--muted);font-size:0.8rem">(บทแรก)</span>`
-          }</td>
+          <td>
+            ${carryCellHtml}
+          </td>
         </tr>
       </table>
     </div>`;
-  }
-
-  return html + '</div>';
-}
-
-async function analyze() {
-  const text = document.getElementById('poemInput').value.trim();
-  if (!text) { document.getElementById('result').innerHTML = ''; return; }
-
-  const btn = document.getElementById('analyzeBtn');
-  btn.textContent = 'กำลังวิเคราะห์…';
-  btn.disabled = true;
-
-  try {
-    const res = await fetch('/api/poem/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      document.getElementById('result').innerHTML =
-        `<div style="color:var(--err);padding:16px;background:var(--surface);border-radius:var(--radius)">เกิดข้อผิดพลาด: ${err.error || res.statusText}</div>`;
-      return;
-    }
-    const data = await res.json();
-    lastStanzas = data.stanzas;
-    document.getElementById('result').innerHTML = data.stanzas.map(renderStanza).join('');
-  } catch (e) {
-    document.getElementById('result').innerHTML =
-      `<div style="color:var(--err);padding:16px;background:var(--surface);border-radius:var(--radius)">ไม่สามารถเชื่อมต่อ API ได้: ${e.message}</div>`;
-  } finally {
-    btn.textContent = 'วิเคราะห์';
-    btn.disabled = false;
-  }
-}
-
-document.getElementById('showDiagram').addEventListener('change', function() {
-  if (lastStanzas) {
-    document.getElementById('result').innerHTML = lastStanzas.map(renderStanza).join('');
-  }
-});
-
-function clearAll() {
-  document.getElementById('poemInput').value = '';
-  document.getElementById('result').innerHTML = '';
-  document.getElementById('synonymSuggestions').innerHTML = '';
-  lastStanzas = null;
-}
-</script>
-</body>
+        }
+        return html + "</div>";
+      }
+      async function analyze() {
+        const text = document.getElementById("poemInput").value.trim();
+        if (!text) {
+          document.getElementById("result").innerHTML = "";
+          return;
+        }
+        // const btn = document.getElementById('analyzeBtn');
+        // btn.textContent = 'กำลังวิเคราะห์…';
+        // btn.disabled = true;
+        try {
+          const res = await fetch("/api/poem/analyze", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            document.getElementById("result").innerHTML =
+              `<div style="color:var(--err);
+        padding:16px;
+        background:var(--surface);
+        border-radius:var(--radius)">เกิดข้อผิดพลาด: ${err.error || res.statusText}</div>`;
+            return;
+          }
+          const data = await res.json();
+          lastStanzas = data.stanzas;
+          // document.getElementById("result").innerHTML = data.stanzas
+          //   .map(renderStanza)
+          //   .join("");
+          document.getElementById("result").innerHTML = data.stanzas
+            .map((st, i) => renderStanza(st, data.stanzas[i + 1]))
+            .join("");
+        } catch (e) {
+          document.getElementById("result").innerHTML =
+            `<div style="color:var(--err);
+      padding:16px;
+      background:var(--surface);
+      border-radius:var(--radius)">ไม่สามารถเชื่อมต่อ API ได้: ${e.message}</div>`;
+        } finally {
+          // btn.textContent = 'วิเคราะห์';
+          // btn.disabled = false;////////////ปุ่มจ้าาาาาา
+        }
+      }
+      document
+        .getElementById("showDiagram")
+        .addEventListener("change", function () {
+          if (lastStanzas) {
+            // document.getElementById("result").innerHTML = lastStanzas
+            //   .map(renderStanza)
+            //   .join("");
+            document.getElementById("result").innerHTML = lastStanzas
+              .map((st, i) => renderStanza(st, lastStanzas[i + 1]))
+              .join("");
+          }
+        });
+      function clearAll() {
+        document.getElementById("poemInput").value = "";
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("synonymSuggestions").innerHTML = "";
+        lastStanzas = null;
+      }
+    </script>
+  </body>
 </html>

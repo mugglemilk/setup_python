@@ -28,7 +28,7 @@ FINAL_CLASS = {
 # Vowel patterns → vowel name (adapted from setup_python VOWEL_RULES)
 _C = r'[ก-ฮ]'
 _T = r'[่-๋]?'
-VOWEL_RULES: list[tuple[re.Pattern, str]] = [
+VOWEL_RULES: list[tuple[re.Pattern, str]] = [ ###
     (re.compile(rf'แ{_C}{_T}ะ'),            'แอะ'),
     (re.compile(rf'โ{_C}{_T}ะ'),            'โอะ'),
     (re.compile(rf'เ{_C}{_T}ะ'),            'เอะ'),
@@ -38,6 +38,7 @@ VOWEL_RULES: list[tuple[re.Pattern, str]] = [
     (re.compile(rf'เ{_C}{{1,2}}{_T}ืน'),   'เอือ'),
     (re.compile(rf'{_C}{_T}ัว'),            'อัว'),
     (re.compile(rf'เ{_C}{_T}า'),            'เอา'),
+    (re.compile(rf'เ{_C}{_T}อ'), 'เออ'),
     (re.compile(rf'เ{_C}{{1,2}}{_T}{_C}{{1,2}}(?:์)?'), 'เอะ'),
     (re.compile(r'ะ'),  'อะ'),
     (re.compile(r'ั'),  'อะ'),   # sara a ย่อ (กัน วัน มัน) — เสียงเดียวกับ ะ ก่อนตัวสะกด
@@ -60,7 +61,7 @@ HALF_NAMES = ['วรรคสดับ', 'วรรครับ', 'วรรค
 
 # ─── consonant cluster table (for syllable counting) ─────────────────────────
 
-CLUSTERS = {
+CLUSTERS = { ###ตัวแปลควบกล้ำ
     ('ก','ร'),('ก','ล'),('ก','ว'),
     ('ข','ร'),('ข','ล'),('ข','ว'),
     ('ค','ร'),('ค','ล'),('ค','ว'),
@@ -146,7 +147,7 @@ def _rhymes(a: str, b: str) -> bool:
 
 # ─── syllable tokenizer ───────────────────────────────────────────────────────
 
-def _syllabify(text: str) -> list[str]:
+def _syllabify(text: str) -> list[str]:##ตัดคำ
     """Tokenize Thai text into syllables using engine='dict'.
     Post-processes to merge single-consonant fragments back into preceding syllable
     (mirrors the logic in setup_python/nlp_engine.py count_syllables_list).
@@ -154,7 +155,7 @@ def _syllabify(text: str) -> list[str]:
     if not text.strip():
         return []
     try:
-        raw = _syl_tok(text, engine='dict')
+        raw = _syl_tok(text, engine='dict') ##ตัดพยางค์ดิบจาก pythaiNLP มาจาก  pythainlp.tokenize.syllable_tokenize มันจะตัดข้อความให้เป็นพยางค์ดิบก่อน (import มาจาก core.py)
         raw = [s for s in raw if s.strip()]
     except Exception:
         words = word_tokenize(text, engine='newmm', keep_whitespace=False)
@@ -165,6 +166,13 @@ def _syllabify(text: str) -> list[str]:
 
     expanded: list[tuple[str, bool]] = []
     for s in raw:
+        # ดักจับคำที่ขึ้นต้นด้วยสระนำหน้าและสั้นความยาว 3 ตัว
+        # เช่น 'เจอ', 'เธอ', 'เผลอ', 'เขย', 'แดง', 'โตน' 
+        # เพื่อป้องกันไม่ให้คำเหล่านี้ไหลลงไปโดนหั่นแยกพยัญชนะในเงื่อนไขด้านล่าง
+        if len(s) == 3 and s[0] in LEADING_VOWELS:
+            expanded.append((s, False))
+            continue
+
         # อักษรนำ + leading vowel: เ/แ/โ/ไ/ใ + อักษรนำ + อักษรต่ำ + (มีสระ)
         # เช่น เสมือน → ส + เมือน, เสมอ, เสนาะ
         if (len(s) >= 4 and s[0] in LEADING_VOWELS and s[1] in THAI_CONS
@@ -173,6 +181,7 @@ def _syllabify(text: str) -> list[str]:
                 and any(v in s[2:] for v in VOWELS)):
             expanded.append((s[1], True))
             expanded.append((s[0] + s[2:], False))
+            
         # Split syllables that begin with leading-vowel + two non-cluster consonants.
         # Guard: skip if len==3 and last char is a valid final consonant —
         # that means it IS a proper single syllable like แสน เกด โจน.
@@ -183,11 +192,13 @@ def _syllabify(text: str) -> list[str]:
                 and (len(s) >= 4 or s[-1] not in ALL_FINALS)):
             expanded.append((s[1], True))
             expanded.append((s[0] + s[2:], False))
+            
         # Split syllables: consonant + leading-vowel + consonant (อักษรนำ)
         elif (len(s) >= 3 and s[0] in THAI_CONS and s[1] in LEADING_VOWELS
-              and s[2] in THAI_CONS and s[1] != 'อ'):
+                and s[2] in THAI_CONS and s[1] != 'อ' and s[2] != 'อ'):
             expanded.append((s[0], True))
             expanded.append((s[1:], False))
+            
         # Split two-consonant onset that isn't a valid cluster
         elif (len(s) >= 3 and s[0] in THAI_CONS and s[1] in THAI_CONS
               and s[0] not in ('ห', 'อ') and s[1] != 'อ'
@@ -207,14 +218,14 @@ def _syllabify(text: str) -> list[str]:
         else:
             merged.append(s)
 
-    return merged
+    return merged ##ลิสต์พยางค์ที่ตัดเสร็จแล้วแสดงออกที่ตัวแปรนี้
 
 
 # ─── half-line splitter ───────────────────────────────────────────────────────
 
 def _split_halves(line: str) -> tuple[str, str]:
     """Split a line into two วรรค.  User separates halves with 2+ spaces / tab / | / /."""
-    m = re.search(r'\s{2,}|\t|[|/]', line)
+    m = re.search(r'\s{2,}|\t|[|/]', line) ##แบ่งวรรค
     if m:
         return line[:m.start()].strip(), line[m.end():].strip()
     syls = _syllabify(line)
@@ -231,15 +242,15 @@ def _split_halves(line: str) -> tuple[str, str]:
 
 def _check_syl_pos(from_syl: str, to_syls: list[str]) -> tuple[bool, int]:
     """Check if from_syl rhymes with พยางค์ that 3 or 5 (index 2 or 4) of to_syls."""
-    for idx in [2, 4]:
+    for idx in [2, 4]: ##ตัวเมื่อกี้ ir1_ok, ir1_idx ส่งตัวท้ายบทแรกมาเช็คสัมผัสกับวรรคที่ 2 วนตั้งแต่ตำแหน่ง 2-3
         if idx < len(to_syls) and _rhymes(from_syl, to_syls[idx]):
-            return True, idx
-    return False, -1
+            return True, idx 
+    return False, -1 
 
 
 # ─── main analysis ────────────────────────────────────────────────────────────
 
-def analyze(text: str) -> dict:
+def analyze(text: str) -> dict: ###นับจำนวนพยางค์แต่ละวรรค 
     """
     กลอนแปด rules (syllable-level):
       Rule 1 (สัมผัสใน):  H1[-1] → H2[พยางค์ที่ 3 หรือ 5]
@@ -255,25 +266,25 @@ def analyze(text: str) -> dict:
         line1 = lines[si] if si < len(lines) else ''
         line2 = lines[si + 1] if si + 1 < len(lines) else ''
 
-        halves_text = [*_split_halves(line1), *_split_halves(line2)]
-        h_syls = [_syllabify(t) for t in halves_text]
-        last = [s[-1] if s else '' for s in h_syls]
+        halves_text = [*_split_halves(line1), *_split_halves(line2)] ##แบ่งวรรค
+        h_syls = [_syllabify(t) for t in halves_text] ##เก็บวรรค
+        last = [s[-1] if s else '' for s in h_syls] ##lastเก็บตัวท้ายของทุกวรรค h_sylsเก็บวรรคทั้งวรรค
 
-        ir1_ok, ir1_idx = _check_syl_pos(last[0], h_syls[1])
-        nok_ok = _rhymes(last[1], last[2])
-        ir3_ok, ir3_idx = _check_syl_pos(last[2], h_syls[3])
-        carry_ok = _rhymes(prev_h4_syl, last[1]) if prev_h4_syl else None
+        ir1_ok, ir1_idx = _check_syl_pos(last[0], h_syls[1]) ##เช็คสัมผัสแล้วส่งมาเป็นสถานะ คำสุดท้ายของวรรคแรกและวรรคที่สองทั้งวรรค
+        nok_ok = _rhymes(last[1], last[2]) ##คำสุดท้ายของวรรคที่ 2 กับคำสุดท้ายของวรรคที 3
+        ir3_ok, ir3_idx = _check_syl_pos(last[2], h_syls[3]) ##คำสุดท้ายของวรรคที่ 3 กับคำที่ 3 ของวรรคสุดท้าย
+        carry_ok = _rhymes(prev_h4_syl, last[1]) if prev_h4_syl else None ##คำสุดท้ายของวรรคที่ 4 จะไปสัมผัสกับบทถัดไป
 
         issues = []
         if last[0] and len(h_syls[1]) > 2 and not ir1_ok:
             issues.append({'type': 'err',
-                           'message': f'สัมผัสใน: "{last[0]}" (ท้ายวรรคสดับ) ควรสัมผัสกับพยางค์ที่ 3 หรือ 5 ของวรรครับ'})
+                           'message': f'สัมผัสนอก: "{last[0]}" (ท้ายวรรคสดับ) ควรสัมผัสกับพยางค์ที่ 3 หรือ 5 ของวรรครับ'})
         if last[1] and last[2] and not nok_ok:
             issues.append({'type': 'err',
                            'message': f'สัมผัสนอก: "{last[1]}" (ท้ายวรรครับ) ไม่สัมผัสกับ "{last[2]}" (ท้ายวรรครอง)'})
         if last[2] and len(h_syls[3]) > 2 and not ir3_ok:
             issues.append({'type': 'err',
-                           'message': f'สัมผัสใน: "{last[2]}" (ท้ายวรรครอง) ควรสัมผัสกับพยางค์ที่ 3 หรือ 5 ของวรรคส่ง'})
+                           'message': f'สัมผัสนอก: "{last[2]}" (ท้ายวรรครอง) ควรสัมผัสกับพยางค์ที่ 3 หรือ 5 ของวรรคส่ง'})
         if carry_ok is False:
             issues.append({'type': 'warn',
                            'message': f'ส่งระหว่างบท: "{prev_h4_syl}" ควรสัมผัสกับ "{last[1]}" (ท้ายวรรครับ)'})
@@ -324,6 +335,10 @@ def analyze(text: str) -> dict:
                         cls = 'r-nai' if (nok_ok and carry_ok is not False) else 'r-bad'
                         if cls == 'r-bad':
                             tip = tip_h2
+                        elif carry_ok is True:
+                            cls = 'r-carry-recv'   # รับสัมผัสระหว่างบทจากบทก่อนหน้า
+                        else:
+                            cls = 'r-nai'
                     elif hi == 2:
                         cls = 'r-nai' if nok_ok else 'r-bad'
                         if not nok_ok:
